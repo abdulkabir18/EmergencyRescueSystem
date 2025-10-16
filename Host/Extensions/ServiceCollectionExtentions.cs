@@ -100,13 +100,18 @@ namespace Host.Extensions
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = jwtSettings.Issuer,
+                    ValidIssuer = jwtSettings!.Issuer,
                     ValidateAudience = true,
                     ValidAudience = jwtSettings.Audience,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                     ValidateLifetime = true
                 };
+            }).AddGoogle(options =>
+            {
+                options.ClientId = config["GoogleAuth:ClientId"]!;
+                options.ClientSecret = config["GoogleAuth:ClientSecret"]!;
+                options.SaveTokens = true;
             });
 
             services.AddHttpContextAccessor();

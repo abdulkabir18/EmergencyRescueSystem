@@ -1,7 +1,9 @@
 ﻿using Application.Common.Dtos;
+using Application.Features.Auth.Commands.ContinueWithGoogle;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Dtos;
 using Application.Features.Users.Commands.RegisterUser;
+using Application.Features.Users.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -128,6 +130,20 @@ namespace Host.Controllers.v1
                 return BadRequest(result);
 
             return Ok(result);
+        }
+
+        [HttpPost("continue-with-google")]
+        [SwaggerOperation(Summary = "Continue login or register with Google account")]
+        [ProducesResponseType(typeof(Result<LoginResponseModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<LoginResponseModel>>> ContinueWithGoogle([FromBody] GoogleLoginRequestModel model)
+        {
+            var result = await _mediator.Send(new ContinueWithGoogleCommand(model));
+
+            if (result.Succeeded)
+                return Ok(result);
+            else
+                return BadRequest(result); // or appropriate status based on your Result type
         }
 
         //[HttpPost("verify-email")]

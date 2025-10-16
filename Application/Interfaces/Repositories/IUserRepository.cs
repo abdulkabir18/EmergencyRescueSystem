@@ -1,5 +1,7 @@
-﻿using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Dtos;
+using Application.Common.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.Enums;
 using System.Linq.Expressions;
 
 namespace Application.Interfaces.Repositories
@@ -9,6 +11,9 @@ namespace Application.Interfaces.Repositories
         Task<User?> GetAsync(Expression<Func<User, bool>> expression);
         Task<User?> GetUserByEmailAsync(string email);
         Task<bool> IsEmailExistAsync(string email);
+        Task<PaginatedResult<User>> GetAllUsersByRoleAsync(UserRole role, int pageNumber, int pageSize);
+        Task<PaginatedResult<User>> GetAllUsersAsync(int pageNumber, int pageSize);
+        Task<PaginatedResult<User>> SearchUsersAsync(string keyword,int pageNumber, int pageSize);
         //Task<IEnumerable<string>> GetEmergencyContactEmailsAsync(Guid userId);
         //Task<bool> IsEmergencyContactEmailExistAsync(Guid userId, string email);
         //Task<bool> IsEmergencyContactPhoneNumberExistAsync(Guid userId, string phoneNumber);

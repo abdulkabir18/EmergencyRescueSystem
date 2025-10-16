@@ -1,5 +1,7 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Common.Dtos;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,34 @@ namespace Infrastructure.Persistence.Repositories
         public UserRepository(ProjectDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<PaginatedResult<User>> GetAllUsersAsync(int pageNumber, int pageSize)
+        {
+            var query = _dbContext.Users.AsNoTracking().Where(u => !u.IsDeleted);
+
+            var totalCount = query.Count();
+
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PaginatedResult<User>.Create(users, totalCount, pageNumber, pageSize);
+        }
+
+        public async Task<PaginatedResult<User>> GetAllUsersByRoleAsync(UserRole role, int pageNumber, int pageSize)
+        {
+            var query = _dbContext.Users.AsNoTracking().Where(u => !u.IsDeleted && u.Role == role);
+
+            var totalCount = query.Count();
+
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PaginatedResult<User>.Create(users, totalCount, pageNumber, pageSize);
         }
 
         public Task<User?> GetAsync(Expression<Func<User, bool>> expression)
@@ -47,6 +77,26 @@ namespace Infrastructure.Persistence.Repositories
         {
             return _dbContext.Users.AsNoTracking().AnyAsync(x => x.Email == new Email(email));
         }
+
+        public async Task<PaginatedResult<User>> SearchUsersAsync(string keyword, int pageNumber, int pageSize)
+        {
+            keyword = keyword?.ToLower() ?? "";
+
+            var query = _dbContext.Users
+                .Where(u =>
+                    EF.Functions.Like(u.FullName.ToLower(), $"%{keyword}%") ||
+                    EF.Functions.Like(u.Email.Value.ToLower(), $"%{keyword}%"));
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+           return PaginatedResult<User>.Create(items, totalCount, pageNumber, pageSize);
+        }
+
 
         //public Task<bool> IsEmergencyContactEmailExistAsync(Guid userId, string email)
         //{

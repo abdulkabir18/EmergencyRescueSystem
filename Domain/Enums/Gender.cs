@@ -7,6 +7,8 @@ namespace Domain.Enums
         [Display(Name = "Male")]
         Male = 1,
         [Display(Name = "Female")]
-        Female
+        Female,
+        [Display(Name = "Other")]
+        Other
     }
 }
