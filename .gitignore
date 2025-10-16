@@ -1,0 +1,56 @@
+# === Build folders ===
+bin/
+obj/
+out/
+
+# === User-specific files ===
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# === Visual Studio / IDE ===
+.vs/
+.idea/
+*.swp
+
+# === Logs ===
+*.log
+logs/
+
+# === Environment & Config (never commit secrets) ===
+.env
+*.secret.json
+appsettings.Development.json
+appsettings.*.json
+
+# Local configs
+Host/Configs/
+
+# === Package managers ===
+node_modules/
+packages/
+*.nupkg
+
+# === Compiled output ===
+*.dll
+*.exe
+*.pdb
+
+# === Publish output ===
+publish/
+wwwroot/lib/
+
+# Ignore everything inside wwwroot
+wwwroot/*
+
+# But keep the .gitkeep file so the folder exists in repo
+!wwwroot/.gitkeep
+
+
+# === Database Migrations ===
+Migrations/
+
+# === OS / Misc ===
+.DS_Store
+Thumbs.db
