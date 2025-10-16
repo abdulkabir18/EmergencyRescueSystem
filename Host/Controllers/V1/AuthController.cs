@@ -1,5 +1,7 @@
 ﻿using Application.Common.Dtos;
+using Application.Features.Auth.Commands.ConfirmForgotPassword;
 using Application.Features.Auth.Commands.ContinueWithGoogle;
+using Application.Features.Auth.Commands.ForgotPassword;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Dtos;
 using Application.Features.Users.Commands.RegisterUser;
@@ -140,10 +142,10 @@ namespace Host.Controllers.v1
         {
             var result = await _mediator.Send(new ContinueWithGoogleCommand(model));
 
-            if (result.Succeeded)
-                return Ok(result);
-            else
-                return BadRequest(result); // or appropriate status based on your Result type
+            if (!result.Succeeded)
+                return BadRequest(result); 
+
+            return Ok(result);
         }
 
         //[HttpPost("verify-email")]
@@ -163,38 +165,38 @@ namespace Host.Controllers.v1
         //    return Ok(result);
         //}
 
-        //[HttpPost("forgot-password")]
-        //[SwaggerOperation(
-        //    Summary = "Forgot password",
-        //    Description = "Sends a password reset verification code to the user's registered email address."
-        //)]
-        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        //public async Task<ActionResult<Result<bool>>> ForgotPassword([FromBody] ForgotPasswordCommand command)
-        //{
-        //    var result = await _mediator.Send(command);
+        [HttpPost("forgot-password")]
+        [SwaggerOperation(
+            Summary = "Forgot password",
+            Description = "Sends a password reset verification code to the user's registered email address."
+        )]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<bool>>> ForgotPassword([FromBody] ForgotPasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
 
-        //    if (!result.Succeeded)
-        //        return BadRequest(result);
+            if (!result.Succeeded)
+                return BadRequest(result);
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
-        //[HttpPost("reset-password")]
-        //[SwaggerOperation(
-        //    Summary = "Reset password (token/OTP)",
-        //    Description = "Resets a user's password using a verification code (OTP) sent to their email. Provide Email, Code and the new password."
-        //)]
-        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        //public async Task<ActionResult<Result<bool>>> ResetPassword([FromBody] ResetPasswordCommand command)
-        //{
-        //    var result = await _mediator.Send(command);
+        [HttpPost("confirm-forgot-password")]
+        [SwaggerOperation(
+            Summary = "Confirm forgot password (token/OTP)",
+            Description = "Resets a user's password using a verification code (OTP) sent to their email. Provide Email, Code and the new password."
+        )]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<bool>>> ConfirmForgotPassword([FromBody] ConfirmForgotPasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
 
-        //    if (!result.Succeeded)
-        //        return BadRequest(result);
+            if (!result.Succeeded)
+                return BadRequest(result);
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
     }
 }

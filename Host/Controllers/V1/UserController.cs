@@ -1,4 +1,5 @@
 ﻿using Application.Common.Dtos;
+using Application.Features.Users.Commands.ResetPassword;
 using Application.Features.Users.Dtos;
 using Application.Features.Users.Queries.GetAllUserByRole;
 using Application.Features.Users.Queries.GetUserByEmail;
@@ -62,6 +63,27 @@ namespace Host.Controllers.V1
         public async Task<ActionResult<PaginatedResult<UserDto>>> GetAllByRole([FromQuery] UserRole role, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _mediator.Send(new GetAllUserByRoleQuery(role, pageNumber, pageSize));
+            return Ok(result);
+        }
+
+        [HttpPost("reset-password")]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<bool>>> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            if (command == null || command.Model == null)
+            {
+                return BadRequest(Result<bool>.Failure("Invalid password reset data."));
+            }
+
+            var result = await _mediator.Send(command);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
             return Ok(result);
         }
     }

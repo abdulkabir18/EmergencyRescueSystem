@@ -79,13 +79,13 @@ namespace Domain.Entities
             PasswordHash = hasher.HashPassword(rawPassword);
         }
 
-        //public void ChangePassword(string newPassword, IPasswordHasher hasher)
-        //{
-        //    if (string.IsNullOrWhiteSpace(newPassword))
-        //        throw new ValidationException("Password cannot be empty.");
+        public void ChangePassword(string newPassword, IPasswordHasher hasher)
+        {
+            if (string.IsNullOrWhiteSpace(newPassword))
+                throw new ValidationException("Password cannot be empty.");
 
-        //    PasswordHash = hasher.HashPassword(newPassword);
-        //}
+            PasswordHash = hasher.HashPassword(newPassword);
+        }
 
         public bool VerifyPassword(string password, IPasswordHasher hasher)
         {
@@ -197,6 +197,8 @@ namespace Domain.Entities
         //     EmergencyContacts.Remove(contact);
         //     EmergencyContacts.Add(updated);
         // }
+
+        public bool IsPasswordSet() => !string.IsNullOrEmpty(PasswordHash);
 
         public void VerifyEmail() => IsEmailVerified = true;
 
