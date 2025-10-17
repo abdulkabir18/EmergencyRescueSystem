@@ -1,4 +1,6 @@
-﻿using Application.Interfaces.CurrentUser;
+﻿using Application.Common.Interfaces.Realtime;
+using Application.Interfaces.CurrentUser;
+using Host.Services;
 using Infrastructure.Services.CurrentUser;
 using Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,13 +13,14 @@ namespace Host.Extensions
 {
     public static class ServiceCollectionExtentions
     {
-        //public static IServiceCollection AddHubServices(this IServiceCollection services)
-        //{
-        //    services.AddSignalR();
-        //    services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
+        public static IServiceCollection AddHubServices(this IServiceCollection services)
+        {
+            services.AddSignalR();
+            services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
-        //    return services;
-        //}
+            return services;
+        }
+
         public static IServiceCollection AddApiVersioningWithExplorer(this IServiceCollection services)
         {
             services.AddApiVersioning(options =>
@@ -42,9 +45,9 @@ namespace Host.Extensions
             {
                 options.CustomSchemaIds(type => type.FullName);
 
-                options.SwaggerDoc("V1", new OpenApiInfo
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = "V1",
+                    Version = "v1",
                     Title = "EmergencyRescue API",
                     Description = "Emergency Response API with versioning support",
                     Contact = new OpenApiContact

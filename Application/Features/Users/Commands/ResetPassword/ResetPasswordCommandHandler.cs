@@ -1,5 +1,6 @@
 ﻿using Application.Common.Dtos;
 using Application.Interfaces.CurrentUser;
+using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using Domain.Common.Security;
@@ -15,14 +16,16 @@ namespace Application.Features.Users.Commands.ResetPassword
         private readonly ILogger<ResetPasswordCommandHandler> _logger;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
 
-        public ResetPasswordCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, ILogger<ResetPasswordCommandHandler> logger, ICurrentUserService currentUserService, IUnitOfWork unitOfWork)
+        public ResetPasswordCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, ILogger<ResetPasswordCommandHandler> logger, ICurrentUserService currentUserService, IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _logger = logger;
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
@@ -35,6 +38,8 @@ namespace Application.Features.Users.Commands.ResetPassword
                     _logger.LogWarning("Unauthorized password reset attempt.");
                     return Result<bool>.Failure("Unauthorized. Please log in and try again.");
                 }
+
+                string cacheKey = $"GetUserById_{userId}";
 
                 var user = await _userRepository.GetAsync(u => u.Id == userId && !u.IsDeleted && u.IsActive);
                 if (user == null)
@@ -56,6 +61,8 @@ namespace Application.Features.Users.Commands.ResetPassword
 
                 await _userRepository.UpdateAsync(user);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _cacheService.RemoveAsync(cacheKey);
 
                 _logger.LogInformation("Password changed successfully for user ID: {UserId}", userId);
                 return Result<bool>.Success(true, "Password changed successfully.");

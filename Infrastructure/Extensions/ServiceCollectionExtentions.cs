@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Interfaces.Notifications;
+using Application.Common.Interfaces.Repositories;
 using Application.Interfaces.Auth;
 using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
@@ -12,7 +13,9 @@ using Infrastructure.Persistence.UnitOfWork;
 using Infrastructure.Security;
 using Infrastructure.Services;
 using Infrastructure.Services.Auth;
+using Infrastructure.Services.Caching;
 using Infrastructure.Services.Email;
+using Infrastructure.Services.Notifications;
 using Infrastructure.Services.Storage;
 using Infrastructure.Services.Storage.Manager;
 using Microsoft.EntityFrameworkCore;
@@ -27,8 +30,8 @@ namespace Infrastructure.Extensions
         {
             services.AddSingleton<IVerificationService, VerificationService>();
             services.AddScoped<IAuthService, JwtService>();
-            //services.AddScoped<IInAppNotificationService, InAppNotificationService>();
-            //services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IInAppNotificationService, InAppNotificationService>();
+            services.AddScoped<INotificationService, NotificationService>();
             //services.AddScoped<IAgencyNotifier, AgencyNotifier>();
             //services.AddScoped<IResponderNotifier, ResponderNotifier>();
 
@@ -45,6 +48,14 @@ namespace Infrastructure.Extensions
                 ));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddCaching(this IServiceCollection services)
+        {
+            services.AddMemoryCache();
+            services.AddScoped<ICacheService, MemoryCacheService>();
 
             return services;
         }
@@ -97,14 +108,14 @@ namespace Infrastructure.Extensions
         {
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
-            //services.AddScoped<IAgencyRepository, AgencyRepository>();
-            //services.AddScoped<IResponderRepository, ResponderRepository>();
+            services.AddScoped<IAgencyRepository, AgencyRepository>();
+            services.AddScoped<IResponderRepository, ResponderRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             //services.AddScoped<IIncidentRepository, IncidentRepository>();
             //services.AddScoped<IIncidentResponderRepository, IncidentResponderRepository>();
             //services.AddScoped<IIncidentLiveStreamRepository, IncidentLiveStreamRepository>();
             //services.AddScoped<IIncidentMediaRepository, IncidentMediaRepository>();
             //services.AddScoped<IIncidentLocationUpdateRepository, IncidentLocationUpdateRepository>();
-            //services.AddScoped<INotificationRepository, NotificationRepository>();
             //services.AddScoped<IChatRepository, ChatRepository>();
             //services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
             //services.AddScoped<IMessageRepository, MessageRepository>();

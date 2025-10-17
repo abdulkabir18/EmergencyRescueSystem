@@ -4,6 +4,6 @@ using MediatR;
 
 namespace Application.Features.Users.Queries.SearchUsers
 {
-    public record SearchUsersQuery(string keyword, int PageNumber, int PageSize) : IRequest<PaginatedResult<UserDto>>;
+    public record SearchUsersQuery(string Keyword, int PageNumber, int PageSize) : IRequest<PaginatedResult<UserDto>>;
 
 }

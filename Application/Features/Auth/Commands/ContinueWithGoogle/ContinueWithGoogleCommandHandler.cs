@@ -32,7 +32,7 @@ namespace Application.Features.Auth.Commands.ContinueWithGoogle
             GoogleJsonWebSignature.Payload? payload;
             try
             {
-                payload = await GoogleJsonWebSignature.ValidateAsync(request.Model.accessToken);
+                payload = await GoogleJsonWebSignature.ValidateAsync(request.Model.AccessToken);
             }
             catch (Exception ex)
             {

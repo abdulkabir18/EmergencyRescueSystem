@@ -17,22 +17,22 @@ namespace Domain.Entities
         public Address? Address { get; private set; }
 
         public bool IsEmailVerified { get; private set; }
-        public bool TwoFactorEnabled { get; private set; }
+        //public bool TwoFactorEnabled { get; private set; }
 
         public UserRole Role { get; private set; }
         public bool IsActive { get; private set; }
 
-        //public Guid? AgencyId { get; private set; }
-        //public Guid? ResponderId { get; private set; }
-        //public Responder? Responder { get; private set; }
-        //public Agency? Agency { get; private set; } = default!;
+        public Guid? AgencyId { get; private set; }
+        public Guid? ResponderId { get; private set; }
+        public Responder? Responder { get; private set; }
+        public Agency? Agency { get; private set; } = default!;
 
         //public ICollection<EmergencyContact> EmergencyContacts { get; private set; } = [];
         //public ICollection<Incident> Incidents { get; private set; } = [];
         //public ICollection<ChatParticipant> ChatParticipations { get; private set; } = [];
         //public ICollection<Message> Messages { get; private set; } = [];
         //public ICollection<IncidentLiveStreamParticipant> LiveStreamParticipations { get; private set; } = [];
-        //public ICollection<Notification> Notifications { get; private set; } = [];
+        public ICollection<Notification> Notifications { get; private set; } = [];
 
         private User() { }
 
@@ -48,7 +48,7 @@ namespace Domain.Entities
             Role = role;
             IsActive = true;
             IsEmailVerified = false;
-            TwoFactorEnabled = false;
+            //TwoFactorEnabled = false;
 
             AddDomainEvent(new UserRegisteredEvent(Id, FullName, Email.Value, Role));
         }
@@ -64,7 +64,7 @@ namespace Domain.Entities
                 Role = role,
                 IsActive = true,
                 IsEmailVerified = true,
-                TwoFactorEnabled = false
+                //TwoFactorEnabled = false
             };
 
             //user.AddDomainEvent(new UserRegisteredEvent(user.Id, user.FullName, user.Email.Value, user.Role));
@@ -95,13 +95,13 @@ namespace Domain.Entities
             return hasher.VerifyPassword(PasswordHash!, password);
         }
 
-        //public void UpdateFullName(string fullName)
-        //{
-        //    if (string.IsNullOrWhiteSpace(fullName))
-        //        throw new ValidationException("Full name cannot be empty.");
+        public void UpdateFullName(string fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
+                throw new ValidationException("Full name cannot be empty.");
 
-        //    FullName = fullName;
-        //}
+            FullName = fullName;
+        }
 
         public void SetAddress(Address address)
         {
@@ -116,11 +116,11 @@ namespace Domain.Entities
             ProfilePictureUrl = imageUrl;
         }
 
-        //public void AssignToAgency(Guid agencyId) =>
-        //    AgencyId = agencyId;
+        public void AssignToAgency(Guid agencyId) =>
+            AgencyId = agencyId;
 
-        //public void AssignAsResponder(Guid responderId) =>
-        //    ResponderId = responderId;
+        public void AssignAsResponder(Guid responderId) =>
+            ResponderId = responderId;
 
         //public void ChangeEmail(Email newEmail)
         //{
@@ -202,15 +202,15 @@ namespace Domain.Entities
 
         public void VerifyEmail() => IsEmailVerified = true;
 
-        public void EnableTwoFactorAuth(string secretKey)
-        {
-            TwoFactorEnabled = true;
-        }
+        //public void EnableTwoFactorAuth()
+        //{
+        //    TwoFactorEnabled = true;
+        //}
 
-        public void DisableTwoFactorAuth()
-        {
-            TwoFactorEnabled = false;
-        }
+        //public void DisableTwoFactorAuth()
+        //{
+        //    TwoFactorEnabled = false;
+        //}
 
         public void Deactivate() => IsActive = false;
         public void Reactivate() => IsActive = true;

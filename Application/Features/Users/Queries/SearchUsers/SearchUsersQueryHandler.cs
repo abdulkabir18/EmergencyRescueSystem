@@ -11,7 +11,7 @@ namespace Application.Features.Users.Queries.SearchUsers
     {
         public async Task<PaginatedResult<UserDto>> Handle(SearchUsersQuery request, CancellationToken cancellationToken)
         {
-            string cacheKey = $"SearchUsers_{request.keyword}_{request.PageNumber}_{request.PageSize}";
+            string cacheKey = $"SearchUsers_{request.Keyword}_{request.PageNumber}_{request.PageSize}";
 
             var cachedResult = await cacheService.GetAsync<PaginatedResult<UserDto>>(cacheKey);
 
@@ -19,7 +19,7 @@ namespace Application.Features.Users.Queries.SearchUsers
             {
                 return cachedResult;
             }
-            var users = await userRepository.SearchUsersAsync(request.keyword, request.PageNumber, request.PageSize);
+            var users = await userRepository.SearchUsersAsync(request.Keyword, request.PageNumber, request.PageSize);
 
             var userDtos = users.Data!.Select(user => new UserDto
             {

@@ -1,5 +1,7 @@
 ﻿using Application.Common.Dtos;
 using Application.Features.Users.Commands.ResetPassword;
+using Application.Features.Users.Commands.SetProfileImage;
+using Application.Features.Users.Commands.UpdateFullName;
 using Application.Features.Users.Dtos;
 using Application.Features.Users.Queries.GetAllUserByRole;
 using Application.Features.Users.Queries.GetUserByEmail;
@@ -7,6 +9,7 @@ using Application.Features.Users.Queries.GetUserById;
 using Application.Features.Users.Queries.SearchUsers;
 using Domain.Enums;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -21,6 +24,81 @@ namespace Host.Controllers.V1
         public UserController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        [SwaggerOperation(
+            Summary = "Upload or update the current user's profile image.",
+            Description = "Requires authentication. The request must be `multipart/form-data` and include an image file under the 'image' key."
+        )]
+        [Authorize]
+        [HttpPatch("profile-image")]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<Unit>>> SetProfileImage(IFormFile image)
+        {
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest(Result<Unit>.Failure("An image file is required."));
+            }
+
+            var result = await _mediator.Send(new SetProfileImageCommand(image));
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [SwaggerOperation(
+            Summary = "Update the current user's details.",
+            Description = "Requires authentication. Update fields like first name and last name."
+        )]
+        [Authorize]
+        [HttpPatch("details")]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<Unit>>> UpdateBasicDetails([FromBody] UpdateFullNameCommand command)
+        {
+            if (command == null || command.Model == null)
+            {
+                return BadRequest(Result<Unit>.Failure("Invalid user details provided."));
+            }
+
+            var result = await _mediator.Send(command);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [SwaggerOperation(
+            Summary = "Update the current user's address.",
+            Description = "Requires authentication. Update fields like street, city, state, and zip code."
+        )] 
+        [Authorize]
+        [HttpPatch("update-address")]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<Unit>>> UpdateAddress([FromBody] UpdateFullNameCommand command)
+        {
+            if (command == null || command.Model == null)
+            {
+                return BadRequest(Result<Unit>.Failure("Invalid user details provided."));
+            }
+            var result = await _mediator.Send(command);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
 
         [HttpGet("search")]
@@ -66,6 +144,10 @@ namespace Host.Controllers.V1
             return Ok(result);
         }
 
+        [SwaggerOperation(
+            Summary = "Reset the current user's password.",
+            Description = "Requires authentication. Provide current password, new password, and confirmation of the new password."
+        )]
         [HttpPost("reset-password")]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]

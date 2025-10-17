@@ -5,5 +5,5 @@ using MediatR;
 
 namespace Application.Features.Users.Queries.GetAllUserByRole
 {
-    public record GetAllUserByRoleQuery(UserRole Role,int pageNumber,int pageSize) : IRequest<PaginatedResult<UserDto>>;
+    public record GetAllUserByRoleQuery(UserRole Role,int PageNumber,int PageSize) : IRequest<PaginatedResult<UserDto>>;
 }

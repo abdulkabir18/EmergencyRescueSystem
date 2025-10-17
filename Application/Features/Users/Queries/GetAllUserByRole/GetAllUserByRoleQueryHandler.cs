@@ -11,7 +11,7 @@ namespace Application.Features.Users.Queries.GetAllUserByRole
     {
         public async Task<PaginatedResult<UserDto>> Handle(GetAllUserByRoleQuery request, CancellationToken cancellationToken)
         {
-            string cacheKey = $"GetAllUserByRole_{request.Role}_{request.pageNumber}_{request.pageSize}";
+            string cacheKey = $"GetAllUserByRole_{request.Role}_{request.PageNumber}_{request.PageSize}";
 
             var cachedResult = await cacheService.GetAsync<PaginatedResult<UserDto>>(cacheKey);
 
@@ -19,7 +19,7 @@ namespace Application.Features.Users.Queries.GetAllUserByRole
             {
                 return cachedResult;
             }
-            var users = await userRepository.GetAllUsersByRoleAsync(request.Role, request.pageNumber, request.pageSize);
+            var users = await userRepository.GetAllUsersByRoleAsync(request.Role, request.PageNumber, request.PageSize);
 
             var userDtos = users.Data!.Select(user => new UserDto
             {
@@ -38,7 +38,7 @@ namespace Application.Features.Users.Queries.GetAllUserByRole
                     Country = user.Address.Country
                 } : null,
             }).ToList();
-            var result = PaginatedResult<UserDto>.Create(userDtos, users.TotalCount, request.pageNumber, request.pageSize);
+            var result = PaginatedResult<UserDto>.Create(userDtos, users.TotalCount, request.PageNumber, request.PageSize);
             await cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(10));
             return result;
         }

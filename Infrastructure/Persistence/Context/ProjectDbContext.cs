@@ -19,7 +19,9 @@ namespace Infrastructure.Persistence.Context
         //}
 
         public DbSet<User> Users { get; set; } = default!;
-
+        public DbSet<Agency> Agencies { get; set; } = default!;
+        public DbSet<Responder> Responders { get; set; } = default!;
+        public DbSet<Notification> Notifications { get; set; } = default!;
 
         internal async Task DispatchDomainEventsAsync()
         {

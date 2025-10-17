@@ -72,15 +72,15 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
             //    .HasForeignKey(s => s.SenderId)
             //    .OnDelete(DeleteBehavior.Restrict);
 
-            //builder.HasOne(u => u.Agency)
-            //    .WithOne(a => a.AgencyAdmin)
-            //    .HasForeignKey<Agency>(u => u.AgencyAdminId)
-            //    .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(u => u.Agency)
+                .WithOne(a => a.AgencyAdmin)
+                .HasForeignKey<Agency>(u => u.AgencyAdminId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            //builder.HasOne(u => u.Responder)
-            //    .WithOne(r => r.User)
-            //    .HasForeignKey<Responder>(r => r.UserId)
-            //    .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(u => u.Responder)
+                .WithOne(r => r.User)
+                .HasForeignKey<Responder>(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             //builder.HasMany(u => u.Incidents)
             //    .WithOne(i => i.User)
@@ -92,10 +92,10 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
             //.HasForeignKey(u => u.UserId)
             //.OnDelete(DeleteBehavior.Restrict);
 
-            //builder.HasMany(u => u.Notifications)
-            //    .WithOne(n => n.Recipient)
-            //    .HasForeignKey(n => n.RecipientId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(u => u.Notifications)
+                .WithOne(n => n.Recipient)
+                .HasForeignKey(n => n.RecipientId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

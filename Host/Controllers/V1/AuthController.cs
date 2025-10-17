@@ -3,7 +3,9 @@ using Application.Features.Auth.Commands.ConfirmForgotPassword;
 using Application.Features.Auth.Commands.ContinueWithGoogle;
 using Application.Features.Auth.Commands.ForgotPassword;
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.VerifyUserEmail;
 using Application.Features.Auth.Dtos;
+using Application.Features.Users.Commands.ReactivateOrDeactivate;
 using Application.Features.Users.Commands.RegisterUser;
 using Application.Features.Users.Dtos;
 using MediatR;
@@ -148,22 +150,22 @@ namespace Host.Controllers.v1
             return Ok(result);
         }
 
-        //[HttpPost("verify-email")]
-        //[SwaggerOperation(
-        //    Summary = "Verify user email",
-        //    Description = "Verifies a user's email address using a verification code."
-        //)]
-        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        //public async Task<ActionResult<Result<bool>>> VerifyEmail([FromBody] VerifyUserEmailCommand command)
-        //{
-        //    var result = await _mediator.Send(command);
+        [HttpPost("verify-email")]
+        [SwaggerOperation(
+            Summary = "Verify user email",
+            Description = "Verifies a user's email address using a verification code."
+        )]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<bool>>> VerifyEmail([FromBody] VerifyUserEmailCommand command)
+        {
+            var result = await _mediator.Send(command);
 
-        //    if (!result.Succeeded)
-        //        return BadRequest(result);
+            if (!result.Succeeded)
+                return BadRequest(result);
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
         [HttpPost("forgot-password")]
         [SwaggerOperation(
@@ -191,6 +193,28 @@ namespace Host.Controllers.v1
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Result<bool>>> ConfirmForgotPassword([FromBody] ConfirmForgotPasswordCommand command)
         {
+            var result = await _mediator.Send(command);
+
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPatch("{id:guid}/status")]
+        [SwaggerOperation(
+            Summary = "Reactivate or Deactivate a User",
+            Description = "Allows a SuperAdmin to toggle a user's active status. " +
+                          "If the user is active, they will be deactivated. If inactive, they will be reactivated."
+        )]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<Result<Unit>>> ReactivateOrDeactivateUser(Guid id)
+        {
+            var command = new ReactivateOrDeactivateCommand(new ReactivateOrDeactivateRequestModel(id));
             var result = await _mediator.Send(command);
 
             if (!result.Succeeded)
