@@ -78,6 +78,11 @@ namespace Infrastructure.Persistence.Repositories
             return _dbContext.Users.AsNoTracking().AnyAsync(x => x.Email == new Email(email));
         }
 
+        public async Task<bool> IsUserExistByIdAsync(Guid userId)
+        {
+            return await _dbContext.Users.AsNoTracking().AnyAsync(u => u.Id == userId);
+        }
+
         public async Task<PaginatedResult<User>> SearchUsersAsync(string keyword, int pageNumber, int pageSize)
         {
             keyword = keyword?.ToLower() ?? "";

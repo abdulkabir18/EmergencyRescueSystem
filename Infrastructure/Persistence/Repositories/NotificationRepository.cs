@@ -1,6 +1,8 @@
+using Application.Common.Dtos;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -15,6 +17,25 @@ namespace Infrastructure.Persistence.Repositories
         public async Task AddAsync(ICollection<Notification> notifications)
         {
             await _dbContext.Notifications.AddRangeAsync(notifications);
+        }
+
+        public async Task<int> GetUnreadCountAsync(Guid userId)
+        {
+            return await _dbContext.Notifications.CountAsync(n => n.RecipientId == userId && !n.IsRead);
+        }
+
+        public async Task<PaginatedResult<Notification>> GetUserNotificationsAsync(Guid userId, int pageNumber = 1, int pageSize = 10)
+        {
+            var query = _dbContext.Notifications.AsNoTracking().Where(n => n.RecipientId == userId && !n.IsDeleted);
+
+            var totalCount = query.Count();
+
+            var notifications = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PaginatedResult<Notification>.Create(notifications, totalCount, pageNumber, pageSize);
         }
     }
 }

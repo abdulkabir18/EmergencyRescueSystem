@@ -1,5 +1,7 @@
+using Application.Common.Dtos;
 using Application.Common.Interfaces.Notifications;
 using Application.Common.Interfaces.Realtime;
+using Application.Interfaces.CurrentUser;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using Domain.Entities;
@@ -11,13 +13,15 @@ namespace Infrastructure.Services.Notifications
     public class InAppNotificationService : IInAppNotificationService
     {
         private readonly INotificationRepository _notificationRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IRealtimeNotifier _realtimeNotifier;
         private readonly ILogger<InAppNotificationService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public InAppNotificationService(INotificationRepository notificationRepository, IRealtimeNotifier realtimeNotifier, ILogger<InAppNotificationService> logger, IUnitOfWork unitOfWork)
+        public InAppNotificationService(INotificationRepository notificationRepository, IUserRepository userRepository, IRealtimeNotifier realtimeNotifier, ILogger<InAppNotificationService> logger, IUnitOfWork unitOfWork)
         {
             _notificationRepository = notificationRepository;
+            _userRepository = userRepository;
             _realtimeNotifier = realtimeNotifier;
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -76,6 +80,41 @@ namespace Infrastructure.Services.Notifications
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Notification {NotificationId} marked as read", notificationId);
+        }
+
+        public async Task<PaginatedResult<NotificationDto>> GetUserNotificationsAsync(Guid userId, int pageNumber = 1, int pageSize = 10)
+        {
+            bool isExist = await _userRepository.IsUserExistByIdAsync(userId);
+            if(isExist)
+            {
+                var notifications = await _notificationRepository.GetUserNotificationsAsync(userId, pageNumber, pageSize);
+
+                var notificationDto = notifications!.Data.Select(notification => new NotificationDto
+                {
+                    Id = notification.Id,
+                    Title = notification.Title,
+                    Message = notification.Message,
+                    IsRead = notification.IsRead,
+                    CreatedAt = notification.CreatedAt,
+                    TargetId = notification.TargetId,
+                    TargetType = notification.TargetType,
+                    Type = notification.Type
+                }).ToList();
+
+                var result = PaginatedResult<NotificationDto>.Create(notificationDto, notifications.TotalCount, pageNumber, pageSize);
+                return result;
+            }
+            return PaginatedResult<NotificationDto>.Failure("User did not exist");
+        }
+
+        public async Task<int> GetUnreadCountAsync(Guid userId)
+        {
+            bool isExist = await _userRepository.IsUserExistByIdAsync(userId);
+            if (!isExist)
+                return -1;
+
+            int count = await _notificationRepository.GetUnreadCountAsync(userId);
+            return count;
         }
     }
 }

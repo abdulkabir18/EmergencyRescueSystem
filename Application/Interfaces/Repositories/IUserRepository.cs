@@ -11,6 +11,7 @@ namespace Application.Interfaces.Repositories
         Task<User?> GetAsync(Expression<Func<User, bool>> expression);
         Task<User?> GetUserByEmailAsync(string email);
         Task<bool> IsEmailExistAsync(string email);
+        Task<bool> IsUserExistByIdAsync(Guid userId);
         Task<PaginatedResult<User>> GetAllUsersByRoleAsync(UserRole role, int pageNumber, int pageSize);
         Task<PaginatedResult<User>> GetAllUsersAsync(int pageNumber, int pageSize);
         Task<PaginatedResult<User>> SearchUsersAsync(string keyword,int pageNumber, int pageSize);
