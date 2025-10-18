@@ -41,11 +41,14 @@ namespace Infrastructure.Extensions
 
         public static IServiceCollection AddDbConnection(this IServiceCollection services, IConfiguration configuration)
         {
+            var conn = configuration.GetConnectionString("AppString");
+
+            //Console.WriteLine(conn);
+
             services.AddDbContext<ProjectDbContext>(options =>
-                options.UseMySql(
-                    configuration.GetConnectionString("AppString"),
-                    ServerVersion.AutoDetect(configuration.GetConnectionString("AppString"))
-                ));
+                options.UseNpgsql(conn)
+                .EnableDetailedErrors()
+            );
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

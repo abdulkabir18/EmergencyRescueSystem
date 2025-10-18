@@ -7,7 +7,7 @@ namespace Application.Features.Auth.Validators
     {
         public GoogleLoginRequestModelValidator()
         {
-            RuleFor(x => x.accessToken)
+            RuleFor(x => x.AccessToken)
                 .NotEmpty().WithMessage("Access token is required.")
                 .Must(token => !string.IsNullOrWhiteSpace(token))
                 .WithMessage("Access token cannot be whitespace.");

@@ -30,7 +30,7 @@ namespace Host.Controllers.V1
         [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Result<string>>> SendToUserAsync([FromQuery] Guid recipientId, [FromQuery] string title, [FromQuery] string message, [FromQuery] NotificationType type, [FromQuery] Guid? targetId = null, [FromQuery] string? targetType = null)
+        public async Task<ActionResult<Result<string>>> SendToUser([FromQuery] Guid recipientId, [FromQuery] string title, [FromQuery] string message, [FromQuery] NotificationType type, [FromQuery] Guid? targetId = null, [FromQuery] string? targetType = null)
         {
             await _notificationService.SendToUserAsync(recipientId, title, message, type, targetId, targetType);
             return Ok(Result<string>.Success("Notification sent successfully."));
@@ -46,7 +46,7 @@ namespace Host.Controllers.V1
         [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Result<string>>> BroadcastAsync([FromBody] IEnumerable<Guid> recipientIds, [FromQuery] string title, [FromQuery] string message, [FromQuery] NotificationType type, [FromQuery] Guid? targetId = null, [FromQuery] string? targetType = null)
+        public async Task<ActionResult<Result<string>>> Broadcast([FromBody] IEnumerable<Guid> recipientIds, [FromQuery] string title, [FromQuery] string message, [FromQuery] NotificationType type, [FromQuery] Guid? targetId = null, [FromQuery] string? targetType = null)
         {
             await _notificationService.BroadcastAsync(recipientIds, title, message, type, targetId, targetType);
             return Ok(Result<string>.Success("Broadcast notification sent successfully."));
@@ -60,10 +60,44 @@ namespace Host.Controllers.V1
         [ProducesResponseType(typeof(Result<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Result<string>>> MarkAsReadAsync(Guid notificationId)
+        public async Task<ActionResult<Result<string>>> MarkAsRead(Guid notificationId)
         {
             await _notificationService.MarkAsReadAsync(notificationId);
             return Ok(Result<string>.Success("Notification marked as read."));
+        }
+
+        [HttpGet("user/{userId:guid}")]
+        [SwaggerOperation(
+            Summary = "Get paginated notifications for a user",
+            Description = "Retrieves notifications for the specified user, paginated by page number and size."
+        )]
+        [ProducesResponseType(typeof(PaginatedResult<NotificationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<PaginatedResult<NotificationDto>>> GetUserNotifications(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _notificationService.GetUserNotificationsAsync(userId, pageNumber, pageSize);
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("user/{userId:guid}/unread-count")]
+        [SwaggerOperation(
+            Summary = "Get unread notification count for a user",
+            Description = "Returns the total number of unread notifications for the specified user."
+        )]
+        [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<int>>> GetUnreadCount(Guid userId)
+        {
+            int count = await _notificationService.GetUnreadCountAsync(userId);
+            if (count < 0)
+                return BadRequest(Result<int>.Failure("User not found."));
+
+            return Ok(Result<int>.Success(count, "Unread count retrieved successfully."));
         }
     }
 }

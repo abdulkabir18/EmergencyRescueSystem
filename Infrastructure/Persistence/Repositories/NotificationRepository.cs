@@ -26,7 +26,7 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<PaginatedResult<Notification>> GetUserNotificationsAsync(Guid userId, int pageNumber = 1, int pageSize = 10)
         {
-            var query = _dbContext.Notifications.AsNoTracking().Where(n => n.RecipientId == userId && !n.IsDeleted);
+            var query = _dbContext.Notifications.AsNoTracking().Where(n => n.RecipientId == userId && !n.IsDeleted).OrderByDescending(n => n.CreatedAt);
 
             var totalCount = query.Count();
 

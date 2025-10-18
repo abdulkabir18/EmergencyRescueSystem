@@ -1,7 +1,7 @@
 using Application.Common.Dtos;
 using Application.Common.Interfaces.Notifications;
 using Application.Common.Interfaces.Realtime;
-using Application.Interfaces.CurrentUser;
+using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using Domain.Entities;
@@ -14,13 +14,15 @@ namespace Infrastructure.Services.Notifications
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ICacheService _cacheService;
         private readonly IRealtimeNotifier _realtimeNotifier;
         private readonly ILogger<InAppNotificationService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public InAppNotificationService(INotificationRepository notificationRepository, IUserRepository userRepository, IRealtimeNotifier realtimeNotifier, ILogger<InAppNotificationService> logger, IUnitOfWork unitOfWork)
+        public InAppNotificationService(INotificationRepository notificationRepository, IUserRepository userRepository, ICacheService cacheService, IRealtimeNotifier realtimeNotifier, ILogger<InAppNotificationService> logger, IUnitOfWork unitOfWork)
         {
             _notificationRepository = notificationRepository;
+            _cacheService = cacheService;
             _userRepository = userRepository;
             _realtimeNotifier = realtimeNotifier;
             _logger = logger;
@@ -43,6 +45,8 @@ namespace Infrastructure.Services.Notifications
                 notification.CreatedAt
             });
 
+            await _cacheService.RemoveAsync(GetUnreadCacheKey(recipientId));
+
             _logger.LogInformation("Notification saved and sent to user {UserId}", recipientId);
         }
 
@@ -63,6 +67,9 @@ namespace Infrastructure.Services.Notifications
                 TargetType = targetType
             });
 
+            foreach (var id in recipientIds)
+                await _cacheService.RemoveAsync(GetUnreadCacheKey(id));
+
             _logger.LogInformation("Broadcast notification sent to {Count} users", recipientIds.Count());
         }
 
@@ -72,24 +79,33 @@ namespace Infrastructure.Services.Notifications
             if (notification == null)
             {
                 _logger.LogWarning("Notification {NotificationId} not found", notificationId);
-                return;
+                throw new KeyNotFoundException("Notification not found.");
             }
 
             notification.MarkAsRead();
             await _notificationRepository.UpdateAsync(notification);
             await _unitOfWork.SaveChangesAsync();
 
+            await _cacheService.RemoveAsync(GetUnreadCacheKey(notification.RecipientId));
+
             _logger.LogInformation("Notification {NotificationId} marked as read", notificationId);
         }
 
         public async Task<PaginatedResult<NotificationDto>> GetUserNotificationsAsync(Guid userId, int pageNumber = 1, int pageSize = 10)
         {
+
             bool isExist = await _userRepository.IsUserExistByIdAsync(userId);
             if(isExist)
             {
+                string cacheKey = $"notifications:{userId}:page:{pageNumber}:size:{pageSize}";
+                var cached = await _cacheService.GetAsync<PaginatedResult<NotificationDto>>(cacheKey);
+
+                if (cached != null)
+                    return cached;
+
                 var notifications = await _notificationRepository.GetUserNotificationsAsync(userId, pageNumber, pageSize);
 
-                var notificationDto = notifications!.Data.Select(notification => new NotificationDto
+                var notificationDto = notifications.Data!.Select(notification => new NotificationDto
                 {
                     Id = notification.Id,
                     Title = notification.Title,
@@ -102,6 +118,7 @@ namespace Infrastructure.Services.Notifications
                 }).ToList();
 
                 var result = PaginatedResult<NotificationDto>.Create(notificationDto, notifications.TotalCount, pageNumber, pageSize);
+                await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
                 return result;
             }
             return PaginatedResult<NotificationDto>.Failure("User did not exist");
@@ -113,8 +130,20 @@ namespace Infrastructure.Services.Notifications
             if (!isExist)
                 return -1;
 
+            string cacheKey = GetUnreadCacheKey(userId);
+            var cachedCount = await _cacheService.GetAsync<int?>(cacheKey);
+
+            if (cachedCount.HasValue)
+                return cachedCount.Value;
+
             int count = await _notificationRepository.GetUnreadCountAsync(userId);
+
+            await _cacheService.SetAsync(cacheKey, count, TimeSpan.FromMinutes(5));
+
             return count;
         }
+
+        private static string GetUnreadCacheKey(Guid userId)
+            => $"notifications:{userId}:unread-count";
     }
 }
