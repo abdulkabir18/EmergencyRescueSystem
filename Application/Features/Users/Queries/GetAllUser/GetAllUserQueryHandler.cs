@@ -4,14 +4,14 @@ using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using MediatR;
 
-namespace Application.Features.Users.Queries.GetAllUserByRole
+namespace Application.Features.Users.Queries.GetAllUser
 {
-    public class GetAllUserByRoleQueryHandler(ICacheService cacheService,
-        IUserRepository userRepository) : IRequestHandler<GetAllUserByRoleQuery, PaginatedResult<UserDto>>
+    public class GetAllUserQueryHandler(ICacheService cacheService,
+        IUserRepository userRepository) : IRequestHandler<GetAllUserQuery, PaginatedResult<UserDto>>
     {
-        public async Task<PaginatedResult<UserDto>> Handle(GetAllUserByRoleQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedResult<UserDto>> Handle(GetAllUserQuery request, CancellationToken cancellationToken)
         {
-            string cacheKey = $"GetAllUserByRole_{request.Role}_{request.PageNumber}_{request.PageSize}";
+            string cacheKey = $"GetAllUser_{request.PageNumber}_{request.PageSize}";
 
             var cachedResult = await cacheService.GetAsync<PaginatedResult<UserDto>>(cacheKey);
 
@@ -19,7 +19,8 @@ namespace Application.Features.Users.Queries.GetAllUserByRole
             {
                 return cachedResult;
             }
-            var users = await userRepository.GetAllUsersByRoleAsync(request.Role, request.PageNumber, request.PageSize);
+
+            var users = await userRepository.GetAllUsersAsync(request.PageNumber, request.PageSize);
 
             var userDtos = users.Data!.Select(user => new UserDto
             {

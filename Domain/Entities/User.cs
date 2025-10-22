@@ -55,6 +55,9 @@ namespace Domain.Entities
 
         public static User RegisterWithGoogle(string fullName, Email email, string? profilePictureUrl, Gender gender, UserRole role = UserRole.Victim)
         {
+            if (string.IsNullOrEmpty(fullName))
+                throw new ValidationException("Full name is required.");
+
             var user = new User
             {
                 FullName = fullName,
@@ -67,7 +70,6 @@ namespace Domain.Entities
                 //TwoFactorEnabled = false
             };
 
-            //user.AddDomainEvent(new UserRegisteredEvent(user.Id, user.FullName, user.Email.Value, user.Role));
             return user;
         }
 

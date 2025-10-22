@@ -1,7 +1,11 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Configurations.EntityTypeConfigurations
 {
@@ -57,15 +61,26 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
                 .HasForeignKey<Agency>(a => a.AgencyAdminId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //builder.HasMany(a => a.SupportedIncidents)
-            //    .WithOne(s => s.Agency)
-            //    .HasForeignKey(si => si.AgencyId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            var jsonOptions = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-            //builder.HasMany(a => a.SupportedWorkTypes)
-            //    .WithOne(s => s.Agency)
-            //    .HasForeignKey(sw => sw.AgencyId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            builder.Property(a => a.SupportedIncidents)
+                .HasColumnName("SupportedIncidents")
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, jsonOptions),
+                    v => string.IsNullOrEmpty(v)
+                        ? new List<IncidentType>()
+                        : JsonSerializer.Deserialize<List<IncidentType>>(v, jsonOptions)!
+                )
+                .Metadata.SetValueComparer(new ValueComparer<ICollection<IncidentType>>(
+                    (c1, c2) => ReferenceEquals(c1, c2) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                    c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => (ICollection<IncidentType>)(c == null ? new List<IncidentType>() : c.ToList())
+                ));
         }
     }
 }

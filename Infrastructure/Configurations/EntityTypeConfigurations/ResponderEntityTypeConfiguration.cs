@@ -18,7 +18,7 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
             builder.Property(a => a.IsDeleted).IsRequired();
             builder.Property(r => r.Status).HasConversion<int>().IsRequired();
 
-            builder.OwnsOne(r => r.AssignedLocation, loc =>
+            builder.OwnsOne(r => r.Coordinates, loc =>
             {
                 loc.Property(l => l.Latitude)
                          .HasColumnName("AssignedLatitude")
@@ -39,10 +39,10 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
                 .HasForeignKey(r => r.AgencyId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //builder.HasMany(r => r.IncidentAssignments)
-            //    .WithOne(ia => ia.Responder)
-            //    .HasForeignKey(ia => ia.ResponderId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(r => r.IncidentAssignments)
+                .WithOne(ia => ia.Responder)
+                .HasForeignKey(ia => ia.ResponderId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

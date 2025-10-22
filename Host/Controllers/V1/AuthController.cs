@@ -3,6 +3,7 @@ using Application.Features.Auth.Commands.ConfirmForgotPassword;
 using Application.Features.Auth.Commands.ContinueWithGoogle;
 using Application.Features.Auth.Commands.ForgotPassword;
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.ResendVerificationCode;
 using Application.Features.Auth.Commands.VerifyUserEmail;
 using Application.Features.Auth.Dtos;
 using Application.Features.Users.Commands.ReactivateOrDeactivate;
@@ -195,6 +196,18 @@ namespace Host.Controllers.v1
         {
             var result = await _mediator.Send(command);
 
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("resend-verification")]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResendVerificationCode([FromBody] ResendVerificationCodeCommand command)
+        {
+            var result = await _mediator.Send(command);
             if (!result.Succeeded)
                 return BadRequest(result);
 

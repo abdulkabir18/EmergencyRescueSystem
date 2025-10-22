@@ -13,9 +13,9 @@ namespace Domain.Entities
         public Guid AgencyId { get; private set; }
         public Agency Agency { get; private set; } = default!;
         public ResponderStatus Status { get; private set; }
-        public GeoLocation? AssignedLocation { get; private set; }
+        public GeoLocation? Coordinates { get; private set; }
 
-        //public ICollection<IncidentResponder> IncidentAssignments { get; private set; } = [];
+        public ICollection<IncidentResponder> IncidentAssignments { get; private set; } = [];
 
         private Responder() { }
 
@@ -33,13 +33,13 @@ namespace Domain.Entities
         {
             Status = status;
 
-            //AddDomainEvent(new ResponderStatusUpdatedEvent(Id, status));
+            AddDomainEvent(new ResponderStatusUpdatedEvent(Id, status));
         }
 
         public void AssignLocation(GeoLocation location)
         {
-            AssignedLocation = location;
-            // AddDomainEvent(new ResponderAssignedLocationEvent(Id, location));
+            Coordinates = location;
+             //AddDomainEvent(new ResponderAssignedLocationEvent(Id, location));
         }
     }
 }

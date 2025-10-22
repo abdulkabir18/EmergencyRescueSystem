@@ -28,6 +28,8 @@ namespace Application.Features.Users.Queries.SearchUsers
                 Email = user.Email.Value,
                 Role = user.Role.ToString(),
                 ProfilePictureUrl = user.ProfilePictureUrl,
+                Gender = user.Gender.ToString(),
+                IsActive = user.IsActive,
                 Address = user.Address != null ? new AddressDto
                 {
                     Street = user.Address.Street,

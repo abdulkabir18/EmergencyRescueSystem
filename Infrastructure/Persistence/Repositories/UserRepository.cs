@@ -25,6 +25,7 @@ namespace Infrastructure.Persistence.Repositories
             var totalCount = query.Count();
 
             var users = await query
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -39,6 +40,7 @@ namespace Infrastructure.Persistence.Repositories
             var totalCount = query.Count();
 
             var users = await query
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -87,20 +89,50 @@ namespace Infrastructure.Persistence.Repositories
         {
             keyword = keyword?.ToLower() ?? "";
 
+            //var query = _dbContext.Users
+            //.Select(u => new
+            //{
+            //    User = u,
+            //    Email = u.Email.Value
+            //})
+            //.Where(x =>
+            //    EF.Functions.ILike(x.FullName, $"%{keyword}%") ||
+            //    EF.Functions.ILike(x.Email, $"%{keyword}%"));
+
             var query = _dbContext.Users
                 .Where(u =>
-                    EF.Functions.Like(u.FullName.ToLower(), $"%{keyword}%") ||
-                    EF.Functions.Like(u.Email.Value.ToLower(), $"%{keyword}%"));
+                    EF.Functions.ILike(u.FullName, $"%{keyword}%") ||
+                    EF.Functions.ILike(u.Email, $"%{keyword}%"));
 
             var totalCount = await query.CountAsync();
 
             var items = await query
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-           return PaginatedResult<User>.Create(items, totalCount, pageNumber, pageSize);
+            return PaginatedResult<User>.Create(items, totalCount, pageNumber, pageSize);
         }
+
+        //public async Task<PaginatedResult<User>> SearchUsersAsync(string keyword, int pageNumber, int pageSize)
+        //{
+        //    keyword = keyword?.ToLower() ?? "";
+
+        //    var query = _dbContext.Users
+        //        .Where(u =>
+        //            EF.Functions.Like(u.FullName.ToLower(), $"%{keyword}%") ||
+        //            EF.Functions.Like(u.Email.Value.ToLower(), $"%{keyword}%"));
+
+        //    var totalCount = await query.CountAsync();
+
+        //    var items = await query
+        //        .Skip((pageNumber - 1) * pageSize)
+        //        .Take(pageSize)
+        //        .ToListAsync();
+
+        //   return PaginatedResult<User>.Create(items, totalCount, pageNumber, pageSize);
+        //}
 
 
         //public Task<bool> IsEmergencyContactEmailExistAsync(Guid userId, string email)

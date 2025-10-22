@@ -3,7 +3,9 @@ using Application.Features.Users.Commands.ResetPassword;
 using Application.Features.Users.Commands.SetProfileImage;
 using Application.Features.Users.Commands.UpdateFullName;
 using Application.Features.Users.Dtos;
+using Application.Features.Users.Queries.GetAllUser;
 using Application.Features.Users.Queries.GetAllUserByRole;
+using Application.Features.Users.Queries.GetProfile;
 using Application.Features.Users.Queries.GetUserByEmail;
 using Application.Features.Users.Queries.GetUserById;
 using Application.Features.Users.Queries.SearchUsers;
@@ -24,6 +26,23 @@ namespace Host.Controllers.V1
         public UserController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        [ProducesResponseType(typeof(Result<UserProfileDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<UserProfileDto>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<UserProfileDto>>> GetProfile()
+        {
+            var result = await _mediator.Send(new GetProfileQuery());
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
         }
 
         [SwaggerOperation(
@@ -141,6 +160,16 @@ namespace Host.Controllers.V1
         public async Task<ActionResult<PaginatedResult<UserDto>>> GetAllByRole([FromQuery] UserRole role, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _mediator.Send(new GetAllUserByRoleQuery(role, pageNumber, pageSize));
+            return Ok(result);
+        }
+
+        //[Authorize(Roles = "SuperAdmin")]
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get all users (paginated)")]
+        [ProducesResponseType(typeof(PaginatedResult<UserDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PaginatedResult<UserDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _mediator.Send(new GetAllUserQuery(pageNumber, pageSize));
             return Ok(result);
         }
 

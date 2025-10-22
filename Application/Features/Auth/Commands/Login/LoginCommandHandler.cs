@@ -1,5 +1,4 @@
 ﻿using Application.Common.Dtos;
-using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Dtos;
 using Application.Interfaces.Auth;
 using Application.Interfaces.External;
@@ -9,7 +8,7 @@ using Domain.Common.Templates;
 using Domain.ValueObjects;
 using MediatR;
 
-namespace Application.Features.Auth.Commands.LoginUser
+namespace Application.Features.Auth.Commands.Login
 {
     public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginResponseModel>>
     {
@@ -44,8 +43,12 @@ namespace Application.Features.Auth.Commands.LoginUser
             {
                 string code = await _verificationService.GenerateCodeAsync(user.Id);
                 var emailResult = await _emailService.SendEmailAsync(user.Email.Value, EmailTemplates.GetVerificationSubject(), EmailTemplates.GetVerificationBody(code));
+                
+                string message = emailResult.Succeeded
+                    ? "A new verification code has been sent to your inbox." 
+                    : $"Failed to send verification email. {emailResult.Message}";
 
-                return Result<LoginResponseModel>.Failure($"Email not verified. A new verification code has been sent to your inbox.\n{emailResult.Message}");
+                return Result<LoginResponseModel>.Success(new LoginResponseModel(string.Empty, user.IsEmailVerified), $"Email not verified. \n{message}");
             }
 
             string token = _authService.GenerateToken(user.Id, user.Email.Value, user.Role.ToString());
