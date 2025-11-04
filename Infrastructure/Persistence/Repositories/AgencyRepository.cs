@@ -31,7 +31,7 @@ namespace Infrastructure.Persistence.Repositories
 
         public Task<bool> IsNameExistAsync(string name)
         {
-            return _dbContext.Agencies.AsNoTracking().AnyAsync(x => x.Name == name);
+            return _dbContext.Agencies.AsNoTracking().AnyAsync(x => x.Name.ToLower() == name.ToLower());
         }
 
         public Task<bool> IsPhoneNumberExistAsync(string phoneNumber)

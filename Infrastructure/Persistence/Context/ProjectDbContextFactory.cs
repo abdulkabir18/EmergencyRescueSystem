@@ -20,7 +20,7 @@ namespace Infrastructure.Persistence.Context
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("Connection string 'AppString' is missing or empty in appsettings.json.");
 
-            Console.WriteLine($"✅ Using Connection String: {connectionString}");
+            //Console.WriteLine($"✅ Using Connection String: {connectionString}");
 
             var optionsBuilder = new DbContextOptionsBuilder<ProjectDbContext>();
             optionsBuilder.UseNpgsql(connectionString);

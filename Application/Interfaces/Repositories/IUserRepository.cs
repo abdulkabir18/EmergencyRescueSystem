@@ -15,6 +15,7 @@ namespace Application.Interfaces.Repositories
         Task<PaginatedResult<User>> GetAllUsersByRoleAsync(UserRole role, int pageNumber, int pageSize);
         Task<PaginatedResult<User>> GetAllUsersAsync(int pageNumber, int pageSize);
         Task<PaginatedResult<User>> SearchUsersAsync(string keyword,int pageNumber, int pageSize);
+        Task<int> GetTotalUsersCountAsync();
         //Task<IEnumerable<string>> GetEmergencyContactEmailsAsync(Guid userId);
         //Task<bool> IsEmergencyContactEmailExistAsync(Guid userId, string email);
         //Task<bool> IsEmergencyContactPhoneNumberExistAsync(Guid userId, string phoneNumber);

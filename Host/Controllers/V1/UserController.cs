@@ -6,6 +6,7 @@ using Application.Features.Users.Dtos;
 using Application.Features.Users.Queries.GetAllUser;
 using Application.Features.Users.Queries.GetAllUserByRole;
 using Application.Features.Users.Queries.GetProfile;
+using Application.Features.Users.Queries.GetTotalUserCount;
 using Application.Features.Users.Queries.GetUserByEmail;
 using Application.Features.Users.Queries.GetUserById;
 using Application.Features.Users.Queries.SearchUsers;
@@ -141,7 +142,15 @@ namespace Host.Controllers.V1
             return NotFound(result);
         }
 
-        
+        //[Authorize(Roles = "SuperAdmin")]
+        [HttpGet("total-count")]
+        [SwaggerOperation(Summary = "Get total user count")]
+        public async Task<ActionResult<Result<int>>> GetTotalUserCount()
+        {
+            var result = await _mediator.Send(new GetTotalUserCountQuery());
+            return Ok(result);
+        }
+
         [HttpGet("{id:guid}")]
         [SwaggerOperation(Summary = "Get a user by ID")]
         [ProducesResponseType(typeof(Result<UserDto>), StatusCodes.Status200OK)]

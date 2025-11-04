@@ -48,9 +48,14 @@ namespace Infrastructure.Persistence.Repositories
             return PaginatedResult<User>.Create(users, totalCount, pageNumber, pageSize);
         }
 
-        public Task<User?> GetAsync(Expression<Func<User, bool>> expression)
+        public async Task<User?> GetAsync(Expression<Func<User, bool>> expression)
         {
-            return _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(expression);
+            return await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(expression);
+        }
+
+        public async Task<int> GetTotalUsersCountAsync()
+        {
+            return await _dbContext.Users.AsNoTracking().CountAsync(u => !u.IsDeleted);
         }
 
         //public async Task<IEnumerable<string>> GetEmergencyContactEmailsAsync(Guid userId)

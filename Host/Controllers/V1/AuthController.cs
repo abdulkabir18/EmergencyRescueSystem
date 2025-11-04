@@ -1,4 +1,6 @@
 ﻿using Application.Common.Dtos;
+using Application.Features.Agencies.Commands.RegisterAgency;
+using Application.Features.Agencies.Dtos;
 using Application.Features.Auth.Commands.ConfirmForgotPassword;
 using Application.Features.Auth.Commands.ContinueWithGoogle;
 using Application.Features.Auth.Commands.ForgotPassword;
@@ -6,6 +8,8 @@ using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.ResendVerificationCode;
 using Application.Features.Auth.Commands.VerifyUserEmail;
 using Application.Features.Auth.Dtos;
+using Application.Features.Responders.Commands.RegisterResponder;
+using Application.Features.Responders.Dtos;
 using Application.Features.Users.Commands.ReactivateOrDeactivate;
 using Application.Features.Users.Commands.RegisterUser;
 using Application.Features.Users.Dtos;
@@ -45,80 +49,60 @@ namespace Host.Controllers.v1
             return Ok(result);
         }
 
-        //[Authorize(Roles = "SuperAdmin")]
-        //[HttpPost("register-agency")]
-        //[SwaggerOperation(
-        //    Summary = "Register a new agency",
-        //    Description = "Allows a SuperAdmin to register a new agency."
-        //)]
-        //[ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPost("register-agency")]
+        [SwaggerOperation(
+            Summary = "Register a new agency and its admin user.",
+            Description = "Creates an agency, uploads logo, assigns an agency admin, and registers supported incidents."
+        )]
+        [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<Guid>>> RegisterAgency([FromForm] RegisterAgencyFullRequestModel model)
+        {
+            var typeDto = new IncidentTypesDto
+            {
+                SupportedIncidents = model.IncidentTypesEnums.Select(i => new IncidentTypeDto
+                { AcceptedIncidentType = i }).ToList()
+            };
 
-        //public async Task<ActionResult<Result<Guid>>> RegisterAgency([FromForm] RegisterAgencyFullRequestModel model)
-        //{
-        //    var typesDto = new IncidentWorkTypesDto
-        //    {
-        //        SupportedIncidents = model.IncidentTypesEnums.Select(a => new IncidentTypeDto
-        //        { AcceptedIncidentType = a }).ToList(),
+            var commandModel = new RegisterAgencyRequestModel(
+                model.RegisterUserRequest,
+                model.AgencyName,
+                model.AgencyEmail,
+                model.AgencyPhoneNumber,
+                model.AgencyLogo,
+                model.AgencyAddress
+            );
 
-        //        SupportedWorkTypes = model.WorkTypesEnums.Select(b => new WorkTypeDto
-        //        { AcceptedWorkType = b }).ToList()
-        //    };
+            var command = new RegisterAgencyCommand(commandModel, typeDto);
+            var result = await _mediator.Send(command);
 
-        //    var commandModel = new RegisterAgencyRequestModel(
-        //        model.RegisterUserRequest,
-        //        model.AgencyName,
-        //        model.AgencyEmail,
-        //        model.AgencyPhoneNumber,
-        //        model.AgencyLogo,
-        //        model.AgencyAddress
-        //    );
+            if (!result.Succeeded)
+                return BadRequest(result);
 
-        //    var command = new RegisterAgencyCommand(commandModel, typesDto);
-        //    var result = await _mediator.Send(command);
-
-        //    if (!result.Succeeded)
-        //        return BadRequest(result);
-
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
 
-        //[Authorize(Roles = "SuperAdmin, AgencyAdmin")]
-        //[HttpPost("register-responder")]
-        //[SwaggerOperation(
-        //    Summary = "Register a new responder",
-        //    Description = "Allows a SuperAdmin or AgencyAdmin to register a new responder."
-        //)]
-        //[ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status400BadRequest)]
-        //public async Task<ActionResult<Result<Guid>>> RegisterResponder([FromForm] RegisterResponderFullRequestModel model)
-        //{
-        //    var typesDto = new IncidentWorkTypesDto
-        //    {
-        //        SupportedIncidents = model.SpecialtiesEnums.Select(a => new IncidentTypeDto
-        //        { AcceptedIncidentType = a }).ToList(),
+        [Authorize(Roles = "SuperAdmin, AgencyAdmin")]
+        [HttpPost("register-responder")]
+        [SwaggerOperation(
+            Summary = "Register a new responder",
+            Description = "Allows a SuperAdmin or AgencyAdmin to register a new responder."
+        )]
+        [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<Guid>>> RegisterResponder([FromForm] RegisterResponderRequestModel model)
+        {
+            var command = new RegisterResponderCommand(model);
+            var result = await _mediator.Send(command);
 
-        //        SupportedWorkTypes = model.CapabilitiesEnums.Select(b => new WorkTypeDto
-        //        { AcceptedWorkType = b }).ToList()
-        //    };
+            if (!result.Succeeded)
+                return BadRequest(result);
 
-        //    var commandModel = new RegisterResponderRequestModel(
-        //        model.RegisterUserRequest,
-        //        model.AgencyId,
-        //        model.BadgeNumber,
-        //        model.Rank,
-        //        model.AssignedLocation
-        //    );
-
-        //    var command = new RegisterResponderCommand(commandModel, typesDto);
-        //    var result = await _mediator.Send(command);
-
-        //    if (!result.Succeeded)
-        //        return BadRequest(result);
-
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
         [HttpPost("login")]
         [SwaggerOperation(

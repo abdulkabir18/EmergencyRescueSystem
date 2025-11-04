@@ -9,8 +9,8 @@ namespace Domain.Entities
 {
     public class User : AuditableEntity
     {
-        public string FullName { get; private set; }
-        public Email Email { get; private set; }
+        public string FullName { get; private set; } = default!;
+        public Email Email { get; private set; } = default!;
         public string? PasswordHash { get; private set; }
         public string? ProfilePictureUrl { get; private set; }
         public Gender Gender { get; private set; }
@@ -28,7 +28,7 @@ namespace Domain.Entities
         public Agency? Agency { get; private set; } = default!;
 
         //public ICollection<EmergencyContact> EmergencyContacts { get; private set; } = [];
-        //public ICollection<Incident> Incidents { get; private set; } = [];
+        public ICollection<Incident> Incidents { get; private set; } = [];
         //public ICollection<ChatParticipant> ChatParticipations { get; private set; } = [];
         //public ICollection<Message> Messages { get; private set; } = [];
         //public ICollection<IncidentLiveStreamParticipant> LiveStreamParticipations { get; private set; } = [];

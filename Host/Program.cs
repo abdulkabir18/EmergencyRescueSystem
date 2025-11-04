@@ -1,8 +1,10 @@
 using Application.Extensions;
+using FluentValidation;
 using Host.Extensions;
 using Host.Hubs;
 using Infrastructure.Extensions;
 using Infrastructure.Settings;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +53,32 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseExceptionHandler(config =>
+{
+    config.Run(async context =>
+    {
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        context.Response.ContentType = "application/json";
+
+        if (exception == null)
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(new { Message = "Unknown server error occurred." });
+            return;
+        }
+
+        if (exception is ValidationException validationEx)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            var errors = validationEx.Errors.Select(e => new { e.PropertyName, e.ErrorMessage });
+            await context.Response.WriteAsJsonAsync(new { Errors = errors });
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await context.Response.WriteAsJsonAsync(new { Message = "An unexpected error occurred." });
+    });
+});
 app.UseAuthentication();
 
 app.UseAuthorization();

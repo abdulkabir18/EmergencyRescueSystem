@@ -8,9 +8,9 @@ namespace Domain.Entities
 {
     public class Agency : AuditableEntity
     {
-        public string Name { get; private set; }
-        public Email Email { get; private set; }
-        public PhoneNumber PhoneNumber { get; private set; }
+        public string Name { get; private set; } = default!;
+        public Email Email { get; private set; } = default!;
+        public PhoneNumber PhoneNumber { get; private set; } = default!;
         public string? LogoUrl { get; private set; }
         public Address? Address { get; private set; }
         public Guid AgencyAdminId { get; private set; }

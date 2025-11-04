@@ -4,7 +4,7 @@ namespace Domain.ValueObjects
 {
     public sealed class Email : IEquatable<Email>
     {
-        public string Value { get; private set; }
+        public string Value { get; private set; } = default!;
 
         private static readonly Regex EmailRegex =
             new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
@@ -16,7 +16,7 @@ namespace Domain.ValueObjects
             if (string.IsNullOrWhiteSpace(value) || !EmailRegex.IsMatch(value))
                 throw new ArgumentException("Invalid email format.", nameof(value));
 
-            Value = value.ToLowerInvariant();
+            Value = value.Trim().ToLowerInvariant();
         }
 
         public override string ToString() => Value;
