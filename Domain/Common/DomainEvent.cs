@@ -2,7 +2,7 @@
 
 namespace Domain.Common
 {
-    public abstract class DomainEvent : IDomainEvent , INotification
+    public abstract record DomainEvent : IDomainEvent , INotification
     {
         public DateTime OccurredOn { get; protected set; }
 

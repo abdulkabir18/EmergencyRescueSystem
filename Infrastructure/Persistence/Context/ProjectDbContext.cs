@@ -27,7 +27,6 @@ namespace Infrastructure.Persistence.Context
         public DbSet<Responder> Responders { get; set; } = default!;
         public DbSet<Incident> Incidents { get; set; } = default!;
         public DbSet<IncidentResponder> IncidentResponders = default!;
-        public DbSet<IncidentMedia> IncidentMedias { get; set; } = default!;
         public DbSet<Notification> Notifications { get; set; } = default!;
 
         internal async Task DispatchDomainEventsAsync()

@@ -59,7 +59,10 @@ namespace Domain.Entities
         }
 
         public void RemoveSupportedIncident(IncidentType type)
-        { 
+        {
+            if (!SupportedIncidents.Contains(type))
+                throw new InvalidOperationException($"Incident type '{type}' is not supported by this agency.");
+
             SupportedIncidents.Remove(type);
         }
 

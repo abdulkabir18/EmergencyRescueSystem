@@ -17,6 +17,8 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
             builder.Property(a => a.DeletedAt);
             builder.Property(a => a.IsDeleted).IsRequired();
 
+            builder.Property(i => i.Title).IsRequired(false).HasMaxLength(55);
+            builder.Property(a => a.Confidence).IsRequired(false);
             builder.Property(i => i.Type).HasConversion<int>().IsRequired();
             builder.Property(i => i.Status).HasConversion<int>().IsRequired();
             builder.Property(i => i.OccurredAt).IsRequired();
@@ -34,10 +36,20 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
                         .HasPrecision(9, 6);
             });
 
+            builder.OwnsMany(i => i.Medias, medias =>
+            {
+                medias.ToTable("Medias");
+                //medias.WithOwner("IncidentId");
+                medias.Property(m => m.MediaType).IsRequired();
+                medias.Property(m => m.FileUrl).IsRequired().HasMaxLength(150);
+
+            });
+
             builder.OwnsOne(i => i.Address, address =>
             {
-                address.Property(ad => ad.Street).HasMaxLength(200);
-                address.Property(ad => ad.City).HasMaxLength(100);
+                address.Property(ad => ad.Street).HasMaxLength(200).IsRequired(false);
+                address.Property(ad => ad.City).HasMaxLength(100).IsRequired(false);
+                address.Property(ad => ad.LGA).HasMaxLength(100).IsRequired(false);
                 address.Property(ad => ad.State).HasMaxLength(100);
                 address.Property(ad => ad.PostalCode).HasMaxLength(20);
                 address.Property(ad => ad.Country).HasMaxLength(100);
@@ -68,9 +80,9 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
             //                j.ToTable("IncidentResponders");
             //            });
 
-            builder.HasMany(i => i.Medias)
-                   .WithOne(m => m.Incident)
-                   .HasForeignKey(m => m.IncidentId);
+            //builder.HasMany(i => i.Medias)
+            //       .WithOne(m => m.Incident)
+            //       .HasForeignKey(m => m.IncidentId);
         }
     }
 

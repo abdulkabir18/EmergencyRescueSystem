@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Common.Dtos;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.Context;
@@ -37,6 +38,26 @@ namespace Infrastructure.Persistence.Repositories
         public Task<bool> IsPhoneNumberExistAsync(string phoneNumber)
         {
             return _dbContext.Agencies.AsNoTracking().AnyAsync(x => x.PhoneNumber == new PhoneNumber(phoneNumber));
+        }
+
+        public async Task<PaginatedResult<Agency>> GetAllAgenciesAsync(int pageNumber, int pageSize)
+        {
+            var query = _dbContext.Agencies.AsNoTracking().Where(u => !u.IsDeleted);
+
+            var totalCount = await query.CountAsync();
+
+            var agencies = await query
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PaginatedResult<Agency>.Create(agencies, totalCount, pageNumber, pageSize);
+        }
+
+        public Task<PaginatedResult<Agency>> SearchAgenciesAsync(string keyword, int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
         }
     }
 }

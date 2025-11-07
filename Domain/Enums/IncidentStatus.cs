@@ -6,15 +6,26 @@ namespace Domain.Enums
     {
         [Display(Name = "Pending")]
         Pending = 1,
+
         [Display(Name = "Reported")]
         Reported,
+
         [Display(Name = "Inprogress")]
         InProgress,
+
         [Display(Name = "Resolved")]
         Resolved,
+
         [Display(Name = "Escalated")]
         Escalated,
+
         [Display(Name = "Cancelled")]
-        Cancelled
+        Cancelled,
+
+        [Display(Name = "Analyzed")]
+        Analyzed, 
+
+        [Display(Name = "Invalid")]
+        Invalid    
     }
 }

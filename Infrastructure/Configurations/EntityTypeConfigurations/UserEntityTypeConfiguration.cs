@@ -36,8 +36,10 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
             {
                 address.Property(a => a.Street).HasMaxLength(200);
                 address.Property(a => a.City).HasMaxLength(100);
+                address.Property(a => a.LGA).HasMaxLength(100);
                 address.Property(a => a.State).HasMaxLength(100);
                 address.Property(a => a.PostalCode).HasMaxLength(20);
+                address.Property(a => a.Country).HasMaxLength(15);
             });
 
             //builder.OwnsMany(u => u.EmergencyContacts, ec =>

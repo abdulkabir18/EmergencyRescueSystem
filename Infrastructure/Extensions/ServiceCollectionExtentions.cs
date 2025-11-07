@@ -114,8 +114,8 @@ namespace Infrastructure.Extensions
             services.AddScoped<IAgencyRepository, AgencyRepository>();
             services.AddScoped<IResponderRepository, ResponderRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
-            //services.AddScoped<IIncidentRepository, IncidentRepository>();
-            //services.AddScoped<IIncidentResponderRepository, IncidentResponderRepository>();
+            services.AddScoped<IIncidentRepository, IncidentRepository>();
+            services.AddScoped<IIncidentResponderRepository, IncidentResponderRepository>();
             //services.AddScoped<IIncidentLiveStreamRepository, IncidentLiveStreamRepository>();
             //services.AddScoped<IIncidentMediaRepository, IncidentMediaRepository>();
             //services.AddScoped<IIncidentLocationUpdateRepository, IncidentLocationUpdateRepository>();

@@ -173,7 +173,7 @@ namespace Host.Controllers.V1
         }
 
         //[Authorize(Roles = "SuperAdmin")]
-        [HttpGet]
+        [HttpGet("all")]
         [SwaggerOperation(Summary = "Get all users (paginated)")]
         [ProducesResponseType(typeof(PaginatedResult<UserDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<PaginatedResult<UserDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)

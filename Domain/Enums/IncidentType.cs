@@ -2,7 +2,8 @@
 {
     public enum IncidentType
     {
-        Fire = 1,
+        Unknown,
+        Fire ,
         Security,
         Medical,
         NaturalDisaster,

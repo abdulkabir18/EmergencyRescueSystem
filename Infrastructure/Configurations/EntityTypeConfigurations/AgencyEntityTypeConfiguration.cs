@@ -47,6 +47,7 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
                 address.Property(ad => ad.Street).HasMaxLength(200);
                 address.Property(ad => ad.City).HasMaxLength(100);
                 address.Property(ad => ad.State).HasMaxLength(100);
+                address.Property(ad => ad.LGA).HasMaxLength(100);
                 address.Property(ad => ad.PostalCode).HasMaxLength(20);
                 address.Property(ad => ad.Country).HasMaxLength(100);
             });
