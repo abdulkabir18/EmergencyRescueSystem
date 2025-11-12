@@ -7,10 +7,7 @@ namespace Infrastructure.Persistence.UnitOfWork
     {
         private readonly ProjectDbContext _context;
 
-        public UnitOfWork(ProjectDbContext context)
-        {
-            _context = context;
-        }
+        public UnitOfWork(ProjectDbContext context) { _context = context; }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

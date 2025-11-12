@@ -12,9 +12,11 @@ using Infrastructure.Persistence.Seeding;
 using Infrastructure.Persistence.UnitOfWork;
 using Infrastructure.Security;
 using Infrastructure.Services;
+using Infrastructure.Services.AI;
 using Infrastructure.Services.Auth;
 using Infrastructure.Services.Caching;
 using Infrastructure.Services.Email;
+using Infrastructure.Services.GoogleMaps;
 using Infrastructure.Services.Notifications;
 using Infrastructure.Services.Storage;
 using Infrastructure.Services.Storage.Manager;
@@ -94,6 +96,22 @@ namespace Infrastructure.Extensions
             });
 
             services.AddScoped<IEmailService, BrevoEmailService>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddAIService(this IServiceCollection services)
+        {
+            services.AddHttpClient<OpenAIIncidentAnalyzer>();
+            services.AddScoped<IAIService, OpenAIIncidentAnalyzer>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddGeocodingService(this IServiceCollection services)
+        {
+            services.AddHttpClient<GoogleMapsGeocodingService>();
+            services.AddScoped<IGeocodingService, GoogleMapsGeocodingService>();
 
             return services;
         }

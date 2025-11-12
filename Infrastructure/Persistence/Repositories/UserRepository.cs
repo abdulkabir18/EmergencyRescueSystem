@@ -53,6 +53,11 @@ namespace Infrastructure.Persistence.Repositories
             return await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(expression);
         }
 
+        public async Task<User> GetSuperAdminId()
+        {
+            return await _dbContext.Users.AsNoTracking().Where(u => u.Role == UserRole.SuperAdmin && !u.IsDeleted).FirstAsync();
+        }
+
         public async Task<int> GetTotalUsersCountAsync()
         {
             return await _dbContext.Users.AsNoTracking().CountAsync(u => !u.IsDeleted);

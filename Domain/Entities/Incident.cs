@@ -131,7 +131,7 @@ namespace Domain.Entities
                 Confidence = confidence;
                 Status = IncidentStatus.Invalid;
 
-                //AddDomainEvent(new IncidentAnalyzedEvent(Id, IncidentType.Unknown, confidence, false));
+                AddDomainEvent(new IncidentAnalyzedEvent(Id, IncidentType.Unknown, confidence, false));
                 return;
             }
 
@@ -142,7 +142,12 @@ namespace Domain.Entities
                 Type = detectedType;
 
             Status = IncidentStatus.Analyzed;
-            //AddDomainEvent(new IncidentAnalyzedEvent(Id, detectedType, confidence, true));
+            AddDomainEvent(new IncidentAnalyzedEvent(Id, detectedType, confidence, true));
+        }
+
+        public void SetAddress(Address address)
+        {
+            Address = address ?? throw new ArgumentNullException(nameof(address));
         }
 
         public bool IsAiConfidenceLow(double threshold = 0.7) => Confidence.HasValue && Confidence.Value < threshold;

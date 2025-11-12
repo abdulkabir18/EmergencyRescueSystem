@@ -8,6 +8,7 @@ namespace Application.Interfaces.Repositories
 {
     public interface IUserRepository : IGenericRepository<User>
     {
+        Task<User> GetSuperAdminId();
         Task<User?> GetAsync(Expression<Func<User, bool>> expression);
         Task<User?> GetUserByEmailAsync(string email);
         Task<bool> IsEmailExistAsync(string email);
