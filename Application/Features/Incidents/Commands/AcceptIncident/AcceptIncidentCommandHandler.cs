@@ -2,15 +2,9 @@
 using Application.Interfaces.CurrentUser;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
-using Domain.Entities;
 using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.Incidents.Commands.AcceptIncident
 {
@@ -69,6 +63,29 @@ namespace Application.Features.Incidents.Commands.AcceptIncident
             {
                 return Result<Guid>.Failure("You have already accepted this incident.");
             }
+
+            int countOfAssigned = incident.AssignedResponders.Count;
+            if (countOfAssigned == 0)
+            {
+                incident.AssignResponder(responder.Id, ResponderRole.Primary);
+            }
+            else if(countOfAssigned <= 3)
+            {
+                incident.AssignResponder(responder.Id, ResponderRole.Support);
+            }
+            else
+            {
+                incident.AssignResponder(responder.Id, ResponderRole.Backup);
+            }
+
+            responder.UpdateResponderStatus(ResponderStatus.OnDuty);
+
+            await _incidentRepository.UpdateAsync(incident);
+            await _responderRepository.UpdateAsync(responder);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Responder {ResponderId} accepted incident {IncidentId}", responder.Id, incident.Id);
+            return Result<Guid>.Success(incident.Id, "Incident accepted successfully.");
         }
     }
 }

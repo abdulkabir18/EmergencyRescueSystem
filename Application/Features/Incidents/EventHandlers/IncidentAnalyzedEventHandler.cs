@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces.Notifications;
+using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
@@ -17,17 +18,17 @@ namespace Application.Features.Incidents.EventHandlers
         private readonly IUserRepository _userRepository;
         private readonly IAgencyRepository _agencyRepository;
         private readonly IResponderRepository _responderRepository;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailService _emailService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<IncidentAnalyzedEventHandler> _logger;
 
-        public IncidentAnalyzedEventHandler(IIncidentRepository incidentRepository, IUserRepository userRepository, IAgencyRepository agencyRepository, IResponderRepository responderRepository, IEmailSender emailSender, INotificationService notificationService, ILogger<IncidentAnalyzedEventHandler> logger)
+        public IncidentAnalyzedEventHandler(IIncidentRepository incidentRepository, IUserRepository userRepository, IAgencyRepository agencyRepository, IResponderRepository responderRepository, IEmailService emailService, INotificationService notificationService, ILogger<IncidentAnalyzedEventHandler> logger)
         {
             _incidentRepository = incidentRepository;
             _userRepository = userRepository;
             _agencyRepository = agencyRepository;
             _responderRepository = responderRepository;
-            _emailSender = emailSender;
+            _emailService = emailService;
             _notificationService = notificationService;
             _logger = logger;
         }
@@ -64,7 +65,7 @@ namespace Application.Features.Incidents.EventHandlers
                 await _notificationService.SendUserNotificationAsync(reporter.Id, userTitle, userMessage);
                 try
                 {
-                    await _emailSender.SendEmailAsync(reporter.Email.Value, userTitle, $"<p>{userMessage}</p>");
+                    await _emailService.SendEmailAsync(reporter.Email.Value, userTitle, $"<p>{userMessage}</p>");
                 }
                 catch (Exception ex)
                 {
@@ -86,7 +87,7 @@ namespace Application.Features.Incidents.EventHandlers
                     await _notificationService.SendUserNotificationAsync(reporter.Id, pendingTitle, pendingMessage);
                     try
                     {
-                        await _emailSender.SendEmailAsync(reporter.Email.Value, pendingTitle, pendingMessage);
+                        await _emailService.SendEmailAsync(reporter.Email.Value, pendingTitle, pendingMessage);
                     }
                     catch (Exception ex)
                     {
@@ -129,7 +130,7 @@ namespace Application.Features.Incidents.EventHandlers
                             body.AppendLine($"<p>Occurred At: {incident.OccurredAt:u}</p>");
                             if (incident.Address != null)
                                 body.AppendLine($"<p>Location: {incident.Address}</p>");
-                            await _emailSender.SendEmailAsync(agency.Email.Value, subject, body.ToString());
+                            await _emailService.SendEmailAsync(agency.Email.Value, subject, body.ToString());
                         }
                     }
                     catch (Exception ex)

@@ -1,7 +1,12 @@
+using Application.Common.Dtos;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -43,6 +48,59 @@ namespace Infrastructure.Persistence.Repositories
                                 Math.Sin(Math.PI * i.Coordinates.Latitude / 180.0)
                             )) <= radiusKm)
                 .ToListAsync();
+        }
+
+        public async Task<PaginatedResult<Incident>> GetAllIncidentsAsync(int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var query = _dbContext.Incidents
+                .AsNoTracking()
+                .Where(i => !i.IsDeleted)
+                .Include(i => i.Medias)
+                .Include(i => i.AssignedResponders)
+                    .ThenInclude(ar => ar.Responder)
+                        .ThenInclude(r => r.User)
+                .AsSplitQuery()
+                .OrderByDescending(i => i.OccurredAt);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PaginatedResult<Incident>.Create(items, totalCount, pageNumber, pageSize);
+        }
+
+        public async Task<PaginatedResult<Incident>> GetIncidentsByUserAsync(Guid userId, int pageNumber, int pageSize)
+        {
+            if (userId == Guid.Empty)
+                return PaginatedResult<Incident>.Create([], 0, pageNumber < 1 ? 1 : pageNumber, pageSize < 1 ? 10 : pageSize);
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var query = _dbContext.Incidents
+                .AsNoTracking()
+                .Where(i => !i.IsDeleted && i.UserId == userId)
+                .Include(i => i.Medias)
+                .Include(i => i.AssignedResponders)
+                    .ThenInclude(ar => ar.Responder)
+                        .ThenInclude(r => r.User)
+                .AsSplitQuery()
+                .OrderByDescending(i => i.OccurredAt);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PaginatedResult<Incident>.Create(items, totalCount, pageNumber, pageSize);
         }
     }
 }

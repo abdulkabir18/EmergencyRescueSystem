@@ -1,6 +1,7 @@
 ﻿using Application.Common.Dtos;
 using Application.Features.Users.Commands.ResetPassword;
 using Application.Features.Users.Commands.SetProfileImage;
+using Application.Features.Users.Commands.UpdateAddress;
 using Application.Features.Users.Commands.UpdateFullName;
 using Application.Features.Users.Dtos;
 using Application.Features.Users.Queries.GetAllUser;
@@ -55,14 +56,14 @@ namespace Host.Controllers.V1
         [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Result<Unit>>> SetProfileImage(IFormFile image)
+        public async Task<ActionResult<Result<Unit>>> SetProfileImage(IFormFile image, CancellationToken cancellationToken)
         {
             if (image == null || image.Length == 0)
             {
                 return BadRequest(Result<Unit>.Failure("An image file is required."));
             }
 
-            var result = await _mediator.Send(new SetProfileImageCommand(image));
+            var result = await _mediator.Send(new SetProfileImageCommand(image), cancellationToken);
 
             if (!result.Succeeded)
             {
@@ -81,14 +82,14 @@ namespace Host.Controllers.V1
         [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Result<Unit>>> UpdateBasicDetails([FromBody] UpdateFullNameCommand command)
+        public async Task<ActionResult<Result<Unit>>> UpdateBasicDetails([FromBody] UpdateFullNameCommand command, CancellationToken cancellationToken)
         {
             if (command == null || command.Model == null)
             {
                 return BadRequest(Result<Unit>.Failure("Invalid user details provided."));
             }
 
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
             {
@@ -107,13 +108,13 @@ namespace Host.Controllers.V1
         [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Result<Unit>>> UpdateAddress([FromBody] UpdateFullNameCommand command)
+        public async Task<ActionResult<Result<Unit>>> UpdateAddress([FromBody] UpdateAddressCommand command, CancellationToken cancellationToken)
         {
-            if (command == null || command.Model == null)
+            if (command == null || command.Address == null)
             {
                 return BadRequest(Result<Unit>.Failure("Invalid user details provided."));
             }
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
             if (!result.Succeeded)
             {
                 return BadRequest(result);

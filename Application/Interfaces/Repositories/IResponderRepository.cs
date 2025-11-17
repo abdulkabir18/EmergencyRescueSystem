@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Application.Common.Dtos;
 using Application.Common.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
@@ -10,7 +11,15 @@ namespace Application.Interfaces.Repositories
     {
         Task<Responder?> GetAsync(Expression<Func<Responder, bool>> expression);
         Task<Responder?> GetResponderWithDetailsAsync(Guid id);
-        //Task<IEnumerable<Responder>> GetNearbyRespondersAsync(GeoLocation location, double radiusInKm);
-        //Task<IEnumerable<Responder>> GetNearbyRespondersForIncidentAsync(GeoLocation location, IncidentType type, double radiusInKm);
+
+        // Paging and listing helpers
+        Task<PaginatedResult<Responder>> GetAllRespondersAsync(int pageNumber, int pageSize);
+        Task<PaginatedResult<Responder>> GetRespondersByAgencyAsync(Guid agencyId, int pageNumber, int pageSize);
+
+        // Assigned to an incident (no paging - usually small)
+        Task<IEnumerable<Responder>> GetRespondersByIncidentAsync(Guid incidentId);
+
+        // Nearby responders (paginated)
+        Task<PaginatedResult<Responder>> GetNearbyRespondersAsync(double latitude, double longitude, double radiusKm, int pageNumber, int pageSize);
     }
 }

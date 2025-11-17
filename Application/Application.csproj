@@ -19,9 +19,4 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Incidents\Queries\" />
-    <Folder Include="Features\Responders\Queries\" />
-  </ItemGroup>
-
 </Project>

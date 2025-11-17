@@ -5,16 +5,8 @@ namespace Domain.Enums
         Info = 1,
         System,
         Warning,
-        Error,
+        Alert,
         Success,
-        Incident,
-        IncidentUpdate,
-        IncidentResolved,
-        ResponderAssignment,
-        ResponderUpdate,
-        AgencyAlert,
-        AgencyUpdate,
-        ChatMessage,
         Broadcast,
     }
 }

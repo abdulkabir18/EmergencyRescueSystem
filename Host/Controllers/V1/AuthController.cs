@@ -39,9 +39,9 @@ namespace Host.Controllers.v1
         )]
         [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<Guid>>> Signup([FromForm] RegisterUserCommand command)
+        public async Task<ActionResult<Result<Guid>>> Signup([FromForm] RegisterUserCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);
@@ -58,7 +58,7 @@ namespace Host.Controllers.v1
         [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Result<Guid>>> RegisterAgency([FromForm] RegisterAgencyFullRequestModel model)
+        public async Task<ActionResult<Result<Guid>>> RegisterAgency([FromForm] RegisterAgencyFullRequestModel model, CancellationToken cancellationToken)
         {
             var typeDto = new IncidentTypesDto
             {
@@ -76,7 +76,7 @@ namespace Host.Controllers.v1
             );
 
             var command = new RegisterAgencyCommand(commandModel, typeDto);
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);
@@ -93,10 +93,10 @@ namespace Host.Controllers.v1
         )]
         [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<Guid>>> RegisterResponder([FromForm] RegisterResponderRequestModel model)
+        public async Task<ActionResult<Result<Guid>>> RegisterResponder([FromForm] RegisterResponderRequestModel model, CancellationToken cancellationToken)
         {
             var command = new RegisterResponderCommand(model);
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);
@@ -111,9 +111,9 @@ namespace Host.Controllers.v1
         )]
         [ProducesResponseType(typeof(Result<LoginResponseModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<LoginResponseModel>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<LoginResponseModel>>> Login([FromBody] LoginCommand command)
+        public async Task<ActionResult<Result<LoginResponseModel>>> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);
@@ -125,9 +125,9 @@ namespace Host.Controllers.v1
         [SwaggerOperation(Summary = "Continue login or register with Google account")]
         [ProducesResponseType(typeof(Result<LoginResponseModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<LoginResponseModel>>> ContinueWithGoogle([FromBody] GoogleLoginRequestModel model)
+        public async Task<ActionResult<Result<LoginResponseModel>>> ContinueWithGoogle([FromBody] GoogleLoginRequestModel model, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new ContinueWithGoogleCommand(model));
+            var result = await _mediator.Send(new ContinueWithGoogleCommand(model), cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result); 
@@ -142,9 +142,9 @@ namespace Host.Controllers.v1
         )]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<bool>>> VerifyEmail([FromBody] VerifyUserEmailCommand command)
+        public async Task<ActionResult<Result<bool>>> VerifyEmail([FromBody] VerifyUserEmailCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);
@@ -159,9 +159,9 @@ namespace Host.Controllers.v1
         )]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<bool>>> ForgotPassword([FromBody] ForgotPasswordCommand command)
+        public async Task<ActionResult<Result<bool>>> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);
@@ -176,9 +176,9 @@ namespace Host.Controllers.v1
         )]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<bool>>> ConfirmForgotPassword([FromBody] ConfirmForgotPasswordCommand command)
+        public async Task<ActionResult<Result<bool>>> ConfirmForgotPassword([FromBody] ConfirmForgotPasswordCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);
@@ -189,9 +189,9 @@ namespace Host.Controllers.v1
         [HttpPost("resend-verification")]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ResendVerificationCode([FromBody] ResendVerificationCodeCommand command)
+        public async Task<IActionResult> ResendVerificationCode([FromBody] ResendVerificationCodeCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
             if (!result.Succeeded)
                 return BadRequest(result);
 
@@ -209,10 +209,10 @@ namespace Host.Controllers.v1
         [ProducesResponseType(typeof(Result<Unit>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Result<Unit>>> ReactivateOrDeactivateUser(Guid id)
+        public async Task<ActionResult<Result<Unit>>> ReactivateOrDeactivateUser(Guid id, CancellationToken cancellationToken)
         {
             var command = new ReactivateOrDeactivateCommand(new ReactivateOrDeactivateRequestModel(id));
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);

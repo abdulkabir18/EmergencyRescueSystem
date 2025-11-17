@@ -1,4 +1,7 @@
-﻿using Application.Common.Dtos;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Application.Common.Dtos;
 using Application.Common.Helpers;
 using Application.Interfaces.CurrentUser;
 using Application.Interfaces.External;
@@ -22,9 +25,19 @@ namespace Application.Features.Responders.Commands.RegisterResponder
         private readonly IPasswordHasher _passwordHasher;
         private readonly IStorageManager _storageManager;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
         private readonly ILogger<RegisterResponderCommandHandler> _logger;
 
-        public RegisterResponderCommandHandler(IResponderRepository responderRepository, ICurrentUserService currentUserService, IUserRepository userRepository, IAgencyRepository agencyRepository, IPasswordHasher passwordHasher, IStorageManager storageManager, IUnitOfWork unitOfWork, ILogger<RegisterResponderCommandHandler> logger)
+        public RegisterResponderCommandHandler(
+            IResponderRepository responderRepository,
+            ICurrentUserService currentUserService,
+            IUserRepository userRepository,
+            IAgencyRepository agencyRepository,
+            IPasswordHasher passwordHasher,
+            IStorageManager storageManager,
+            IUnitOfWork unitOfWork,
+            ICacheService cacheService,
+            ILogger<RegisterResponderCommandHandler> logger)
         {
             _responderRepository = responderRepository;
             _currentUserService = currentUserService;
@@ -33,6 +46,7 @@ namespace Application.Features.Responders.Commands.RegisterResponder
             _passwordHasher = passwordHasher;
             _storageManager = storageManager;
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
             _logger = logger;
         }
         public async Task<Result<Guid>> Handle(RegisterResponderCommand request, CancellationToken cancellationToken)
@@ -89,6 +103,18 @@ namespace Application.Features.Responders.Commands.RegisterResponder
                 await _responderRepository.AddAsync(responder);
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                // invalidate responder caches
+                try
+                {
+                    await _cacheService.RemoveAsync($"responder:{responder.Id}");
+                    await _cacheService.RemoveAsync($"responder:user:{user.Id}");
+                    await _cacheService.RemoveByPrefixAsync("responders:");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to invalidate responder caches after registration for responder {ResponderId}", responder.Id);
+                }
 
                 _logger.LogInformation("Responder {ResponderId} for user {UserId} created successfully by {CurrentUserId}.", responder.Id, user.Id, currentUserId);
                 return Result<Guid>.Success(responder.Id, "Responder registered successfully.");

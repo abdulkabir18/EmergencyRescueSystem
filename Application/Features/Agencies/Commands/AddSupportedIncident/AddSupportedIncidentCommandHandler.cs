@@ -1,5 +1,6 @@
 ﻿using Application.Common.Dtos;
 using Application.Interfaces.CurrentUser;
+using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using MediatR;
@@ -12,13 +13,20 @@ namespace Application.Features.Agencies.Commands.AddSupportedIncident
         private readonly IAgencyRepository _agencyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ICacheService _cacheService;
         private readonly ILogger<AddSupportedIncidentCommandHandler> _logger;
 
-        public AddSupportedIncidentCommandHandler(IAgencyRepository agencyRepository, IUnitOfWork unitOfWork, ICurrentUserService currentUserService, ILogger<AddSupportedIncidentCommandHandler> logger)
+        public AddSupportedIncidentCommandHandler(
+            IAgencyRepository agencyRepository,
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService,
+            ICacheService cacheService,
+            ILogger<AddSupportedIncidentCommandHandler> logger)
         {
             _agencyRepository = agencyRepository;
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _cacheService = cacheService;
             _logger = logger;
         }
 
@@ -34,7 +42,7 @@ namespace Application.Features.Agencies.Commands.AddSupportedIncident
                 }
 
                 var agency = await _agencyRepository.GetAsync(a => !a.IsDeleted && a.Id == request.Model.AgencyId);
-                if(agency == null)
+                if (agency == null)
                 {
                     _logger.LogWarning("Agency not found or has been deleted.");
                     return Result<Unit>.Failure("Agency not found or has been deleted.");
@@ -52,6 +60,17 @@ namespace Application.Features.Agencies.Commands.AddSupportedIncident
 
                 await _agencyRepository.UpdateAsync(agency);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                try
+                {
+                    await _cacheService.RemoveAsync($"agency:{request.Model.AgencyId}:supported-incidents");
+                    await _cacheService.RemoveAsync($"agency:{request.Model.AgencyId}");
+                    await _cacheService.RemoveByPrefixAsync("agencies:");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to invalidate cache after adding supported incident for agency {AgencyId}", request.Model.AgencyId);
+                }
 
                 _logger.LogInformation("Incident type successfully added for agency {AgencyId}.", request.Model.AgencyId);
                 return Result<Unit>.Success(Unit.Value, "Incident type successfully added.");

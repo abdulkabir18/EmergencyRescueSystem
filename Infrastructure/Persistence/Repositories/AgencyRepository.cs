@@ -55,9 +55,53 @@ namespace Infrastructure.Persistence.Repositories
             return PaginatedResult<Agency>.Create(agencies, totalCount, pageNumber, pageSize);
         }
 
-        public Task<PaginatedResult<Agency>> SearchAgenciesAsync(string keyword, int pageNumber, int pageSize)
+        public async Task<PaginatedResult<Agency>> SearchAgenciesAsync(string keyword, int pageNumber, int pageSize)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(keyword))
+                return await GetAllAgenciesAsync(pageNumber, pageSize);
+
+            keyword = keyword.Trim();
+
+            var query = _dbContext.Agencies
+                .AsNoTracking()
+                .Where(a => !a.IsDeleted &&
+                            (
+                                EF.Functions.Like(a.Name, $"%{keyword}%")
+                                || (a.Address != null && (
+                                    EF.Functions.Like(a.Address.Street ?? string.Empty, $"%{keyword}%")
+                                    || EF.Functions.Like(a.Address.City ?? string.Empty, $"%{keyword}%")
+                                    || EF.Functions.Like(a.Address.State ?? string.Empty, $"%{keyword}%")
+                                    || EF.Functions.Like(a.Address.Country ?? string.Empty, $"%{keyword}%")
+                                ))
+                            ));
+
+            try
+            {
+                query = query.Where(a =>
+                    EF.Functions.Like(a.Name, $"%{keyword}%")
+                    || EF.Functions.Like(a.Email, $"%{keyword}%")
+                    || EF.Functions.Like(a.PhoneNumber, $"%{keyword}%")
+                    || (a.Address != null && (
+                        EF.Functions.Like(a.Address.Street ?? string.Empty, $"%{keyword}%")
+                        || EF.Functions.Like(a.Address.City ?? string.Empty, $"%{keyword}%")
+                        || EF.Functions.Like(a.Address.State ?? string.Empty, $"%{keyword}%")
+                        || EF.Functions.Like(a.Address.Country ?? string.Empty, $"%{keyword}%")
+                    )));
+            }
+            catch
+            {
+
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(a => a.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PaginatedResult<Agency>.Create(items, totalCount, pageNumber, pageSize);
         }
     }
 }

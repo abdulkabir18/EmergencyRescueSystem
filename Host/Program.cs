@@ -26,6 +26,7 @@ builder.Services.AddSecurity();
 builder.Services.AddEmailService(builder.Configuration);
 builder.Services.AddStorageService(builder.Environment.WebRootPath);
 builder.Services.AddAIService();
+builder.Services.AddGeocodingService();
 
 builder.Services.Configure<PasswordHasherSettings>(builder.Configuration.GetSection("PasswordHasher"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Brevo"));
