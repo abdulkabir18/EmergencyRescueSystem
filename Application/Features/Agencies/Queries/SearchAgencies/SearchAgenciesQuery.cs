@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Application.Features.Agencies.Queries.SearchAgencies
 {
-    public record SearchAgenciesQuery(string Keyword, int PageNumber = 1, int PageSize = 10) : IRequest<Result<PaginatedResult<AgencyDto>>>;
+    public record SearchAgenciesQuery(string Keyword, int PageNumber = 1, int PageSize = 10) : IRequest<PaginatedResult<AgencyDto>>;
 }

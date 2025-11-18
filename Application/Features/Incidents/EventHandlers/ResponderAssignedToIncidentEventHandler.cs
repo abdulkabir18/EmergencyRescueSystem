@@ -46,14 +46,18 @@ namespace Application.Features.Incidents.EventHandlers
                         reporter.Id,
                         "🚑 Responder Assigned to Your Incident",
                         $"Responder {responder.User.FullName} ({notification.Role}) has been assigned to your reported incident '{incident.Title}'.",
-                        NotificationType.Alert);
+                        NotificationType.Alert,
+                        incident.Id,
+                        nameof(incident));
                 }
 
                 await _notificationService.SendUserNotificationAsync(
                     responder.UserId,
                     "✅ Incident Assignment",
                     $"You have been assigned to incident '{incident.Title}' as {notification.Role}.",
-                    NotificationType.Alert);
+                    NotificationType.Alert,
+                    incident.Id,
+                    nameof(incident));
 
                 _logger.LogInformation("Responder {ResponderId} assigned to incident {IncidentId} as {Role}",
                 notification.ResponderId, notification.IncidentId, notification.Role);

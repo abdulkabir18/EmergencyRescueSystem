@@ -72,13 +72,13 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<Incident>.Create(items, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Incident>.Success(items, totalCount, pageNumber, pageSize);
         }
 
         public async Task<PaginatedResult<Incident>> GetIncidentsByUserAsync(Guid userId, int pageNumber, int pageSize)
         {
             if (userId == Guid.Empty)
-                return PaginatedResult<Incident>.Create([], 0, pageNumber < 1 ? 1 : pageNumber, pageSize < 1 ? 10 : pageSize);
+                return PaginatedResult<Incident>.Success([], 0, pageNumber < 1 ? 1 : pageNumber, pageSize < 1 ? 10 : pageSize);
 
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 10;
@@ -100,7 +100,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<Incident>.Create(items, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Incident>.Success(items, totalCount, pageNumber, pageSize);
         }
     }
 }

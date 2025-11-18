@@ -1,18 +1,13 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Common.Dtos;
 using Application.Features.Agencies.Dtos;
 using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
-using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Agencies.Queries.GetAgenciesByIncidentType
 {
-    public class GetAgenciesByIncidentTypeQueryHandler : IRequestHandler<GetAgenciesByIncidentTypeQuery, Result<PaginatedResult<AgencyDto>>>
+    public class GetAgenciesByIncidentTypeQueryHandler : IRequestHandler<GetAgenciesByIncidentTypeQuery, PaginatedResult<AgencyDto>>
     {
         private readonly IAgencyRepository _agencyRepository;
         private readonly ICacheService _cacheService;
@@ -25,7 +20,7 @@ namespace Application.Features.Agencies.Queries.GetAgenciesByIncidentType
             _logger = logger;
         }
 
-        public async Task<Result<PaginatedResult<AgencyDto>>> Handle(GetAgenciesByIncidentTypeQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedResult<AgencyDto>> Handle(GetAgenciesByIncidentTypeQuery request, CancellationToken cancellationToken)
         {
             var pageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
             var pageSize = request.PageSize < 1 ? 10 : request.PageSize;
@@ -37,7 +32,7 @@ namespace Application.Features.Agencies.Queries.GetAgenciesByIncidentType
                 if (cached != null)
                 {
                     _logger.LogInformation("Agencies for incident type {Type} returned from cache (page {Page}).", request.Type, pageNumber);
-                    return Result<PaginatedResult<AgencyDto>>.Success(cached);
+                    return cached;
                 }
             }
             catch (Exception ex)
@@ -50,7 +45,7 @@ namespace Application.Features.Agencies.Queries.GetAgenciesByIncidentType
             if (agenciesRaw == null || !agenciesRaw.Any())
             {
                 _logger.LogInformation("No agencies found supporting incident type {Type}.", request.Type);
-                return Result<PaginatedResult<AgencyDto>>.Failure("No agencies found for requested incident type.");
+                return PaginatedResult<AgencyDto>.Failure("No agencies found for requested incident type.");
             }
 
             var totalCount = agenciesRaw.Count;
@@ -70,7 +65,7 @@ namespace Application.Features.Agencies.Queries.GetAgenciesByIncidentType
                 a.Address?.ToFullAddress()
             )).ToList();
 
-            var resultPage = PaginatedResult<AgencyDto>.Create(dtos, totalCount, pageNumber, pageSize);
+            var resultPage = PaginatedResult<AgencyDto>.Success(dtos, totalCount, pageNumber, pageSize);
 
             try
             {
@@ -81,7 +76,7 @@ namespace Application.Features.Agencies.Queries.GetAgenciesByIncidentType
                 _logger.LogWarning(ex, "Failed to cache agencies for incident type {Type}", request.Type);
             }
 
-            return Result<PaginatedResult<AgencyDto>>.Success(resultPage);
+            return resultPage;
         }
     }
 }

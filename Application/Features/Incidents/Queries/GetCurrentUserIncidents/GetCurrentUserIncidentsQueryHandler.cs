@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Incidents.Queries.GetCurrentUserIncidents
 {
-    public class GetCurrentUserIncidentsQueryHandler : IRequestHandler<GetCurrentUserIncidentsQuery, Result<PaginatedResult<IncidentDto>>>
+    public class GetCurrentUserIncidentsQueryHandler : IRequestHandler<GetCurrentUserIncidentsQuery, PaginatedResult<IncidentDto>>
     {
         private readonly IIncidentRepository _incidentRepository;
         private readonly ICurrentUserService _currentUserService;
@@ -27,13 +27,13 @@ namespace Application.Features.Incidents.Queries.GetCurrentUserIncidents
             _logger = logger;
         }
 
-        public async Task<Result<PaginatedResult<IncidentDto>>> Handle(GetCurrentUserIncidentsQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedResult<IncidentDto>> Handle(GetCurrentUserIncidentsQuery request, CancellationToken cancellationToken)
         {
             var userId = _currentUserService.UserId;
             if (userId == Guid.Empty)
             {
                 _logger.LogWarning("Unauthorized request to get current user's incidents.");
-                return Result<PaginatedResult<IncidentDto>>.Failure("Unauthorized.");
+                return PaginatedResult<IncidentDto>.Failure("Unauthorized.");
             }
 
             var cacheKey = $"incidents:user:{userId}:page:{request.PageNumber}:size:{request.PageSize}";
@@ -41,7 +41,7 @@ namespace Application.Features.Incidents.Queries.GetCurrentUserIncidents
             if (cached != null)
             {
                 _logger.LogInformation("User {UserId} incidents page {Page} returned from cache.", userId, request.PageNumber);
-                return Result<PaginatedResult<IncidentDto>>.Success(cached);
+                return cached;
             }
 
             var incidentsPaged = await _incidentRepository.GetIncidentsByUserAsync(userId, request.PageNumber, request.PageSize);
@@ -49,7 +49,8 @@ namespace Application.Features.Incidents.Queries.GetCurrentUserIncidents
             if (incidentsPaged == null || incidentsPaged.Data == null || !incidentsPaged.Data.Any())
             {
                 _logger.LogInformation("No incidents found for user {UserId} page {Page}", userId, request.PageNumber);
-                return Result<PaginatedResult<IncidentDto>>.Failure("No incidents found.");
+
+                return PaginatedResult<IncidentDto>.Failure("No incidents found.");
             }
 
             var items = incidentsPaged.Data.Select(i => new IncidentDto
@@ -82,7 +83,7 @@ namespace Application.Features.Incidents.Queries.GetCurrentUserIncidents
                 }).ToList() ?? new List<AssignedResponderDto>()
             }).ToList();
 
-            var resultPage = PaginatedResult<IncidentDto>.Create(items, incidentsPaged.TotalCount, request.PageNumber, request.PageSize);
+            var resultPage = PaginatedResult<IncidentDto>.Success(items, incidentsPaged.TotalCount, request.PageNumber, request.PageSize);
 
             try
             {
@@ -94,7 +95,7 @@ namespace Application.Features.Incidents.Queries.GetCurrentUserIncidents
             }
 
             _logger.LogInformation("Returned {Count} incidents for user {UserId} (page {Page})", items.Count, userId, request.PageNumber);
-            return Result<PaginatedResult<IncidentDto>>.Success(resultPage);
+            return resultPage;
         }
     }
 }

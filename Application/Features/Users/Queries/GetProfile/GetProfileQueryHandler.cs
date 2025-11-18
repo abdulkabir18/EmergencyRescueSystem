@@ -1,6 +1,7 @@
 ﻿using Application.Common.Dtos;
 using Application.Features.Users.Dtos;
 using Application.Interfaces.CurrentUser;
+using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using MediatR;
 
@@ -10,10 +11,12 @@ namespace Application.Features.Users.Queries.GetProfile
     {
         private readonly IUserRepository _userRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ICacheService _cacheService;
 
-        public GetProfileQueryHandler(IUserRepository userRepository, ICurrentUserService currentUserService)
+        public GetProfileQueryHandler(ICacheService cacheService, IUserRepository userRepository, ICurrentUserService currentUserService)
         {
             _userRepository = userRepository;
+            _cacheService = cacheService;
             _currentUserService = currentUserService;
         }
 
@@ -23,13 +26,18 @@ namespace Application.Features.Users.Queries.GetProfile
             if (currentUserId == Guid.Empty)
                 return Result<UserProfileDto>.Failure("Unauthorize user");
 
+            string cacheKey = $"GetUserById_{currentUserId}";
+            var cached = await _cacheService.GetAsync<Result<UserProfileDto>>(cacheKey);
+            if(cached != null) 
+                return cached;
+
             var user = await _userRepository.GetAsync(currentUserId);
             if (user == null)
                 return Result<UserProfileDto>.Failure("User not found");
 
             var dto = new UserProfileDto
             {
-                Address = user.Address != null ? user.Address.ToFullAddress() : null,
+                Address = user.Address?.ToFullAddress(),
                 Email = user.Email.Value,
                 FullName = user.FullName,
                 Gender = user.Gender.ToString(),
@@ -37,7 +45,10 @@ namespace Application.Features.Users.Queries.GetProfile
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 Role = user.Role.ToString()
             };
-            return Result<UserProfileDto>.Success(dto);
+
+            var result = Result<UserProfileDto>.Success(dto);
+            await _cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(5));
+            return result;
         }
     }
 }

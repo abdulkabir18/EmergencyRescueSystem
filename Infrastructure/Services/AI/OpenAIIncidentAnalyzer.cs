@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Services.AI
 {
@@ -147,9 +148,17 @@ namespace Infrastructure.Services.AI
 
             try
             {
+                //var result = JsonSerializer.Deserialize<IncidentAIResult>(
+                //    jsonOnly,
+                //    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
                 var result = JsonSerializer.Deserialize<IncidentAIResult>(
-                    jsonOnly,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                jsonOnly,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+                });
 
                 if (result is null)
                     throw new Exception("Deserialized result was null");

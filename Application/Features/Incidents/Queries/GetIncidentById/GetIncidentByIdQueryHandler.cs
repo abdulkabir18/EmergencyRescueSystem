@@ -36,6 +36,7 @@ namespace Application.Features.Incidents.Queries.GetIncidentById
             {
                 _logger.LogWarning("Incident {IncidentId} not found.", request.IncidentId);
                 return Result<IncidentDto>.Failure($"Incident with ID {request.IncidentId} not found.");
+                //return Result<IncidentDto>.Success(new IncidentDto(), $"Incident with ID {request.IncidentId} not found.");
             }
 
             var dto = new IncidentDto

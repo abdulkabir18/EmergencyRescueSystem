@@ -48,7 +48,7 @@ namespace Application.Features.Agencies.Queries.GetSupportedIncidents
             if (agency == null)
             {
                 _logger.LogWarning("Agency {AgencyId} not found.", request.AgencyId);
-                return Result<List<IncidentType>>.Failure($"Agency with ID {request.AgencyId} not found.");
+                return Result<List<IncidentType>>.Success([],$"Agency with ID {request.AgencyId} not found.");
             }
 
             var supported = agency.SupportedIncidents?.ToList() ?? new List<IncidentType>();

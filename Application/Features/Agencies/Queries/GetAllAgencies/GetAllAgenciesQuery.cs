@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Application.Features.Agencies.Queries.GetAllAgencies
 {
-    public record GetAllAgenciesQuery(GetAllAgenciesRequest Model) : IRequest<Result<PaginatedResult<AgencyDto>>>;
+    public record GetAllAgenciesQuery(GetAllAgenciesRequest Model) : IRequest<PaginatedResult<AgencyDto>>;
 }

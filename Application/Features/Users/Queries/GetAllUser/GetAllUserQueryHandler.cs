@@ -21,6 +21,10 @@ namespace Application.Features.Users.Queries.GetAllUser
             }
 
             var users = await userRepository.GetAllUsersAsync(request.PageNumber, request.PageSize);
+            if (users == null || users.Data == null)
+            {
+                return PaginatedResult<UserDto>.Failure("No users found.");
+            }
 
             var userDtos = users.Data!.Select(user => new UserDto
             {
@@ -41,7 +45,7 @@ namespace Application.Features.Users.Queries.GetAllUser
                     Country = user.Address.Country
                 } : null,
             }).ToList();
-            var result = PaginatedResult<UserDto>.Create(userDtos, users.TotalCount, request.PageNumber, request.PageSize);
+            var result = PaginatedResult<UserDto>.Success(userDtos, users.TotalCount, request.PageNumber, request.PageSize);
             await cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(10));
             return result;
         }

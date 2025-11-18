@@ -17,16 +17,18 @@ namespace Application.Features.Incidents.Commands.CreateIncident
         private readonly IIncidentRepository _incidentRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IStorageManager _storageManager;
+        private readonly ICacheService _cacheService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateIncidentCommandHandler> _logger;
 
-        public CreateIncidentCommandHandler(IIncidentRepository incidentRepository, ICurrentUserService currentUserService, IStorageManager storageManager, IUnitOfWork unitOfWork, ILogger<CreateIncidentCommandHandler> logger)
+        public CreateIncidentCommandHandler(IIncidentRepository incidentRepository, ICurrentUserService currentUserService, IStorageManager storageManager, ICacheService cacheService, IUnitOfWork unitOfWork, ILogger<CreateIncidentCommandHandler> logger)
         {
             _incidentRepository = incidentRepository;
             _currentUserService = currentUserService;
             _storageManager = storageManager;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _cacheService = cacheService;
         }
         public async Task<Result<Guid>> Handle(CreateIncidentCommand request, CancellationToken cancellationToken)
         {
@@ -62,6 +64,8 @@ namespace Application.Features.Incidents.Commands.CreateIncident
 
                 await _incidentRepository.AddAsync(incident);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _cacheService.RemoveByPrefixAsync("incidents:");
 
                 _logger.LogInformation("Incident {IncidentId} created at {Time} by user {UserId}. Location: {Latitude}, {Longitude}", incident.Id, DateTime.UtcNow, currentUserId, location.Latitude, location.Longitude);
                 return Result<Guid>.Success(incident.Id, "Incident created successfully.");

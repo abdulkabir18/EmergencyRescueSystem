@@ -51,6 +51,8 @@ namespace Application.Features.Users.Commands.UpdateFullName
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await _cacheService.RemoveAsync(cacheKey);
+            await _cacheService.RemoveByPrefixAsync("GetAllUser");
+            await _cacheService.RemoveAsync($"GetUserByEmail_{user.Email.Value}");
 
             _logger.LogInformation("Full name updated successfully for user {UserId}.", userId);
             return Result<Unit>.Success(Unit.Value, "Full name updated successfully.");

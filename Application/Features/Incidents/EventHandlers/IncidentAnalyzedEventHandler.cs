@@ -6,7 +6,6 @@ using Domain.Enums;
 using Domain.Events;
 using Domain.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -62,7 +61,7 @@ namespace Application.Features.Incidents.EventHandlers
 
                 var userTitle = "✅ Incident Analyzed Successfully";
                 var userMessage = $"Your reported incident '{incident.Title}' has been classified as {incident.Type}.";
-                await _notificationService.SendUserNotificationAsync(reporter.Id, userTitle, userMessage);
+                await _notificationService.SendUserNotificationAsync(reporter.Id, userTitle, userMessage, NotificationType.Info, incident.Id, nameof(incident));
                 try
                 {
                     await _emailService.SendEmailAsync(reporter.Email.Value, userTitle, $"<p>{userMessage}</p>");
@@ -72,8 +71,8 @@ namespace Application.Features.Incidents.EventHandlers
                     _logger.LogError(ex, "Failed to email reporter {UserId} for incident {IncidentId}", reporter.Id, incident.Id);
                 }
 
-                var agencies = (await _agencyRepository.GetAllAsync(a => a.SupportedIncidents.Contains(notification.Type) && !a.IsDeleted)).ToList();
-                if (agencies == null || agencies.Count == 0)
+                var agencies = await _agencyRepository.GetAgenciesBySupportedIncidentAsync(notification.Type);
+                if (agencies == null || agencies.Count() == 0)
                 {
                     _logger.LogWarning("No agencies found for type {Type}.", notification.Type);
 
@@ -84,7 +83,7 @@ namespace Application.Features.Incidents.EventHandlers
                         $"Your reported incident '{incident.Title}' has been analyzed as '{incident.Type}', " +
                         "but currently no agency is available to handle it. Our team has been alerted.";
 
-                    await _notificationService.SendUserNotificationAsync(reporter.Id, pendingTitle, pendingMessage);
+                    await _notificationService.SendUserNotificationAsync(reporter.Id, pendingTitle, pendingMessage, NotificationType.System, incident.Id, nameof(incident));
                     try
                     {
                         await _emailService.SendEmailAsync(reporter.Email.Value, pendingTitle, pendingMessage);

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Application.Common.Dtos;
+﻿using Application.Common.Dtos;
 using Application.Common.Helpers;
 using Application.Interfaces.CurrentUser;
 using Application.Interfaces.External;
@@ -104,11 +101,8 @@ namespace Application.Features.Responders.Commands.RegisterResponder
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                // invalidate responder caches
                 try
                 {
-                    await _cacheService.RemoveAsync($"responder:{responder.Id}");
-                    await _cacheService.RemoveAsync($"responder:user:{user.Id}");
                     await _cacheService.RemoveByPrefixAsync("responders:");
                 }
                 catch (Exception ex)

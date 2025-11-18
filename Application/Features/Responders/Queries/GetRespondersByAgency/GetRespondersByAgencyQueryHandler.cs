@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Common.Dtos;
 using Application.Features.Responders.Dtos;
 using Application.Interfaces.External;
@@ -11,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Responders.Queries.GetRespondersByAgency
 {
-    public class GetRespondersByAgencyQueryHandler : IRequestHandler<GetRespondersByAgencyQuery, Result<PaginatedResult<ResponderDto>>>
+    public class GetRespondersByAgencyQueryHandler : IRequestHandler<GetRespondersByAgencyQuery, PaginatedResult<ResponderDto>>
     {
         private readonly IResponderRepository _responderRepository;
         private readonly ICacheService _cacheService;
@@ -24,7 +20,7 @@ namespace Application.Features.Responders.Queries.GetRespondersByAgency
             _logger = logger;
         }
 
-        public async Task<Result<PaginatedResult<ResponderDto>>> Handle(GetRespondersByAgencyQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedResult<ResponderDto>> Handle(GetRespondersByAgencyQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = $"responders:agency:{request.AgencyId}:p{request.PageNumber}:s{request.PageSize}";
 
@@ -34,7 +30,7 @@ namespace Application.Features.Responders.Queries.GetRespondersByAgency
                 if (cached != null)
                 {
                     _logger.LogInformation("Responders for agency {AgencyId} page {Page} returned from cache.", request.AgencyId, request.PageNumber);
-                    return Result<PaginatedResult<ResponderDto>>.Success(cached);
+                    return cached;
                 }
             }
             catch (Exception ex)
@@ -45,7 +41,7 @@ namespace Application.Features.Responders.Queries.GetRespondersByAgency
             var paged = await _responderRepository.GetRespondersByAgencyAsync(request.AgencyId, request.PageNumber, request.PageSize);
 
             if (paged == null || paged.Data == null || !paged.Data.Any())
-                return Result<PaginatedResult<ResponderDto>>.Failure("No responders found for the agency.");
+                return PaginatedResult<ResponderDto>.Failure("No responders found for the agency.");
 
             var items = paged.Data.Select(r => new ResponderDto
             {
@@ -57,11 +53,11 @@ namespace Application.Features.Responders.Queries.GetRespondersByAgency
                 AgencyId = r.AgencyId,
                 AgencyName = r.Agency?.Name,
                 Status = r.Status.ToString(),
-                Coordinates = r.Coordinates != null ? new Application.Common.Dtos.GeoLocationDto(r.Coordinates.Latitude, r.Coordinates.Longitude) : null,
+                Coordinates = r.Coordinates != null ? new GeoLocationDto(r.Coordinates.Latitude, r.Coordinates.Longitude) : null,
                 CreatedAt = r.CreatedAt
             }).ToList();
 
-            var resultPage = PaginatedResult<ResponderDto>.Create(items, paged.TotalCount, request.PageNumber, request.PageSize);
+            var resultPage = PaginatedResult<ResponderDto>.Success(items, paged.TotalCount, request.PageNumber, request.PageSize);
 
             try
             {
@@ -72,7 +68,7 @@ namespace Application.Features.Responders.Queries.GetRespondersByAgency
                 _logger.LogWarning(ex, "Failed to cache agency responders for {AgencyId} page {Page}", request.AgencyId, request.PageNumber);
             }
 
-            return Result<PaginatedResult<ResponderDto>>.Success(resultPage);
+            return resultPage;
         }
     }
 }

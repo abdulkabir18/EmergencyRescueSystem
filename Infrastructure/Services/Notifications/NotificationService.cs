@@ -23,23 +23,36 @@ namespace Infrastructure.Services.Notifications
             _logger = logger;
         }
 
-        public async Task SendUserNotificationAsync(Guid userId, string title, string message, NotificationType type = NotificationType.System)
+        public async Task SendUserNotificationAsync(Guid userId, string title, string message, NotificationType type = NotificationType.System, Guid? targetId = null, string? targetType = null)
         {
+            if(userId == Guid.Empty || string.IsNullOrEmpty(title) || string.IsNullOrEmpty(message)) 
+                throw new ArgumentNullException("Some feild is null or empty");
+
             await _inAppNotificationService.SendToUserAsync(
                 userId,
                 title,
                 message,
-                type
+                type,
+                targetId,
+                targetType
             );
         }
 
-        public async Task BroadcastAsync(IEnumerable<Guid> userIds, string title, string message, NotificationType type = NotificationType.System)
+        public async Task BroadcastAsync(IEnumerable<Guid> userIds, string title, string message, NotificationType type = NotificationType.System, Guid? targetId = null, string? targetType = null)
         {
+            if (userIds.Count() == 0)
+                throw new Exception("No id found");
+
+            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(message))
+                throw new ArgumentNullException("So feild is empty");
+
             await _inAppNotificationService.BroadcastAsync(
                 userIds,
                 title,
                 message,
-                type
+                type,
+                targetId,
+                targetType
             );
 
             _logger.LogInformation("Broadcast notification sent | Title: {Title} | Recipients: {Count}", title, userIds.Count());
@@ -61,7 +74,7 @@ namespace Infrastructure.Services.Notifications
             
             try
             {
-                await SendUserNotificationAsync(superAdmin.Id, title, message.ToString());
+                await SendUserNotificationAsync(superAdmin.Id, title, message.ToString(), NotificationType.Alert, incident.Id, nameof(incident));
                 await _emailService.SendEmailAsync(superAdmin.Email.Value, title, message.ToString());
                 _logger.LogInformation("Notified SuperAdmins about invalid incident {IncidentId}", incident.Id);
             }
@@ -77,7 +90,7 @@ namespace Infrastructure.Services.Notifications
             var title = "📢 Your Incident Update";
             var message = $"Your reported incident ({incident.Title}) has been analyzed and classified as {incident.Type}.";
 
-            await SendUserNotificationAsync(user.Id, title, message);
+            await SendUserNotificationAsync(user.Id, title, message, NotificationType.Info, incident.Id, nameof(incident));
             await _emailService.SendEmailAsync(user.Email, title, message);
         }
 
@@ -86,7 +99,7 @@ namespace Infrastructure.Services.Notifications
             var title = $"🚨 New {incident.Type} Incident Reported";
             var message = $"An incident ({incident.Title}) has been confirmed near {incident.Address?.ToFullAddress()}. Please assign responders.";
 
-            await SendUserNotificationAsync(agency.AgencyAdminId, title, message);
+            await SendUserNotificationAsync(agency.AgencyAdminId, title, message, NotificationType.Alert, incident.Id, nameof(incident));
             await _emailService.SendEmailAsync(agency.Email, title, message);
         }
 
@@ -95,7 +108,7 @@ namespace Infrastructure.Services.Notifications
             var title = $"🚨 Nearby {incident.Type} Incident Alert";
             var message = $"You are close to a {incident.Type} incident at {incident.Address?.ToFullAddress()}. Please standby or respond.";
 
-            await BroadcastAsync(responders.Select(r => r.UserId), title, message);
+            await BroadcastAsync(responders.Select(r => r.UserId), title, message, NotificationType.Broadcast, incident.Id, nameof(incident));
             await _emailService.SendEmailAsync(responders.Select(r => r.User.Email.Value), title, message);
 
             _logger.LogInformation("Notified {Count} responders for incident {IncidentId}", responders.Count(), incident.Id);

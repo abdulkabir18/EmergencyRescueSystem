@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Common.Dtos;
 using Application.Features.Responders.Dtos;
 using Application.Interfaces.External;
@@ -57,7 +52,7 @@ namespace Application.Features.Responders.Queries.GetRespondersByIncident
                 AgencyId = r.AgencyId,
                 AgencyName = r.Agency?.Name,
                 Status = r.Status.ToString(),
-                Coordinates = r.Coordinates != null ? new Application.Common.Dtos.GeoLocationDto(r.Coordinates.Latitude, r.Coordinates.Longitude) : null,
+                Coordinates = r.Coordinates != null ? new GeoLocationDto(r.Coordinates.Latitude, r.Coordinates.Longitude) : null,
                 CreatedAt = r.CreatedAt
             }).ToList();
 

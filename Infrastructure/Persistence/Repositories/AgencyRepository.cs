@@ -1,10 +1,13 @@
 ﻿using Application.Common.Dtos;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -52,7 +55,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<Agency>.Create(agencies, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Agency>.Success(agencies, totalCount, pageNumber, pageSize);
         }
 
         public async Task<PaginatedResult<Agency>> SearchAgenciesAsync(string keyword, int pageNumber, int pageSize)
@@ -101,7 +104,22 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<Agency>.Create(items, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Agency>.Success(items, totalCount, pageNumber, pageSize);
+        }
+
+        public async Task<IEnumerable<Agency>> GetAgenciesBySupportedIncidentAsync(IncidentType incidentType)
+        {
+            var jsonOptions = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+            };
+
+            var typeJson = JsonSerializer.Serialize(new[] { incidentType }, jsonOptions);
+
+            return await _dbContext.Agencies
+                .Where(a => !a.IsDeleted &&
+                            EF.Functions.JsonContains(a.SupportedIncidents, typeJson))
+                .ToListAsync();
         }
     }
 }

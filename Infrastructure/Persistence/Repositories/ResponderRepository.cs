@@ -72,7 +72,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<Responder>.Create(items, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Responder>.Success(items, totalCount, pageNumber, pageSize);
         }
 
         public async Task<PaginatedResult<Responder>> GetRespondersByAgencyAsync(Guid agencyId, int pageNumber, int pageSize)
@@ -94,7 +94,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<Responder>.Create(items, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Responder>.Success(items, totalCount, pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<Responder>> GetRespondersByIncidentAsync(Guid incidentId)
@@ -139,7 +139,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Select(x => x.Responder)
                 .ToList();
 
-            return PaginatedResult<Responder>.Create(pageItems, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Responder>.Success(pageItems, totalCount, pageNumber, pageSize);
         }
     }
 }

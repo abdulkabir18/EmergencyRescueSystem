@@ -46,6 +46,7 @@ namespace Infrastructure.Services.Notifications
             });
 
             await _cacheService.RemoveAsync(GetUnreadCacheKey(recipientId));
+            await _cacheService.RemoveByPrefixAsync($"notifications:{recipientId}");
 
             _logger.LogInformation("Notification saved and sent to user {UserId}", recipientId);
         }
@@ -68,7 +69,10 @@ namespace Infrastructure.Services.Notifications
             });
 
             foreach (var id in recipientIds)
+            {
                 await _cacheService.RemoveAsync(GetUnreadCacheKey(id));
+                await _cacheService.RemoveByPrefixAsync($"notifications:{id}");
+            }
 
             _logger.LogInformation("Broadcast notification sent to {Count} users", recipientIds.Count());
         }
@@ -87,6 +91,7 @@ namespace Infrastructure.Services.Notifications
             await _unitOfWork.SaveChangesAsync();
 
             await _cacheService.RemoveAsync(GetUnreadCacheKey(notification.RecipientId));
+            await _cacheService.RemoveByPrefixAsync($"notifications:{notification.RecipientId}");
 
             _logger.LogInformation("Notification {NotificationId} marked as read", notificationId);
         }
@@ -104,6 +109,10 @@ namespace Infrastructure.Services.Notifications
                     return cached;
 
                 var notifications = await _notificationRepository.GetUserNotificationsAsync(userId, pageNumber, pageSize);
+                if(notifications == null || notifications.Data.Count == 0)
+                {
+                    return PaginatedResult<NotificationDto>.Failure("No notifications found.");
+                }
 
                 var notificationDto = notifications.Data!.Select(notification => new NotificationDto
                 {
@@ -117,7 +126,7 @@ namespace Infrastructure.Services.Notifications
                     Type = notification.Type
                 }).ToList();
 
-                var result = PaginatedResult<NotificationDto>.Create(notificationDto, notifications.TotalCount, pageNumber, pageSize);
+                var result = PaginatedResult<NotificationDto>.Success(notificationDto, notifications.TotalCount, pageNumber, pageSize);
                 await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
                 return result;
             }

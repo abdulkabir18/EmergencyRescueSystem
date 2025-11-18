@@ -17,12 +17,14 @@ namespace Application.Features.Users.Commands.RegisterUser
         private readonly IPasswordHasher _passwordHasher;
         private readonly IStorageManager _storageManager;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
         private readonly ILogger<RegisterUserCommandHandler> _logger;
 
-        public RegisterUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IStorageManager storageManager, IUnitOfWork unitOfWork, ILogger<RegisterUserCommandHandler> logger)
+        public RegisterUserCommandHandler(IUserRepository userRepository, ICacheService cacheService, IPasswordHasher passwordHasher, IStorageManager storageManager, IUnitOfWork unitOfWork, ILogger<RegisterUserCommandHandler> logger)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
+            _cacheService = cacheService;
             _storageManager = storageManager;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -62,6 +64,17 @@ namespace Application.Features.Users.Commands.RegisterUser
                 await _userRepository.AddAsync(user);
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                try
+                {
+                    await _cacheService.RemoveAsync("User:Count:Total");
+                    await _cacheService.RemoveByPrefixAsync("GetAllUser");
+                    await _cacheService.RemoveByPrefixAsync("SearchUsers_");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to remove from cache");
+                }
 
                 _logger.LogInformation("User {UserId} created successfully.", user.Id);
                 return Result<Guid>.Success(user.Id, "User registered successfully.");

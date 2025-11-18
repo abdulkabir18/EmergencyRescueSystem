@@ -2,12 +2,13 @@ using Application.Common.Dtos;
 using Application.Features.Incidents.Dtos;
 using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
+using Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Incidents.Queries.GetAllIncidents
 {
-    public class GetAllIncidentsQueryHandler : IRequestHandler<GetAllIncidentsQuery, Result<PaginatedResult<IncidentDto>>>
+    public class GetAllIncidentsQueryHandler : IRequestHandler<GetAllIncidentsQuery, PaginatedResult<IncidentDto>>
     {
         private readonly IIncidentRepository _incidentRepository;
         private readonly ICacheService _cacheService;
@@ -20,7 +21,7 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
             _logger = logger;
         }
 
-        public async Task<Result<PaginatedResult<IncidentDto>>> Handle(GetAllIncidentsQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedResult<IncidentDto>> Handle(GetAllIncidentsQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = $"incidents:page:{request.PageNumber}:size:{request.PageSize}";
 
@@ -28,7 +29,7 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
             if (cached != null)
             {
                 _logger.LogInformation("Incidents page {Page} retrieved from cache.", request.PageNumber);
-                return Result<PaginatedResult<IncidentDto>>.Success(cached);
+                return cached;
             }
 
             var incidentsPaged = await _incidentRepository.GetAllIncidentsAsync(request.PageNumber, request.PageSize);
@@ -36,7 +37,8 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
             if (incidentsPaged == null || incidentsPaged.Data == null || !incidentsPaged.Data.Any())
             {
                 _logger.LogInformation("No incidents found for page {Page}, size {Size}", request.PageNumber, request.PageSize);
-                return Result<PaginatedResult<IncidentDto>>.Failure("No incidents found.");
+
+                return PaginatedResult<IncidentDto>.Failure("No incidents found.");
             }
 
             var items = incidentsPaged.Data.Select(i => new IncidentDto
@@ -69,7 +71,7 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
                 }).ToList() ?? []
             }).ToList();
 
-            var resultPage = PaginatedResult<IncidentDto>.Create(items, incidentsPaged.TotalCount, request.PageNumber, request.PageSize);
+            var resultPage = PaginatedResult<IncidentDto>.Success(items, incidentsPaged.TotalCount, request.PageNumber, request.PageSize);
 
             try
             {
@@ -81,7 +83,7 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
             }
 
             _logger.LogInformation("Retrieved {Count} incidents (page {Page}) from DB and cached.", items.Count, request.PageNumber);
-            return Result<PaginatedResult<IncidentDto>>.Success(resultPage);
+            return resultPage;
         }
     }
 }

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Agencies.Queries.SearchAgencies
 {
-    public class SearchAgenciesQueryHandler : IRequestHandler<SearchAgenciesQuery, Result<PaginatedResult<AgencyDto>>>
+    public class SearchAgenciesQueryHandler : IRequestHandler<SearchAgenciesQuery, PaginatedResult<AgencyDto>>
     {
         private readonly IAgencyRepository _agencyRepository;
         private readonly ICacheService _cacheService;
@@ -24,7 +24,7 @@ namespace Application.Features.Agencies.Queries.SearchAgencies
             _logger = logger;
         }
 
-        public async Task<Result<PaginatedResult<AgencyDto>>> Handle(SearchAgenciesQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedResult<AgencyDto>> Handle(SearchAgenciesQuery request, CancellationToken cancellationToken)
         {
             var pageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
             var pageSize = request.PageSize < 1 ? 10 : request.PageSize;
@@ -36,7 +36,7 @@ namespace Application.Features.Agencies.Queries.SearchAgencies
                 if (cached != null)
                 {
                     _logger.LogInformation("Agencies search for '{Keyword}' returned from cache (page {Page}).", request.Keyword, pageNumber);
-                    return Result<PaginatedResult<AgencyDto>>.Success(cached);
+                    return cached;
                 }
             }
             catch (Exception ex)
@@ -49,7 +49,7 @@ namespace Application.Features.Agencies.Queries.SearchAgencies
             if (agenciesPaged == null || agenciesPaged.Data == null || !agenciesPaged.Data.Any())
             {
                 _logger.LogInformation("No agencies matched search '{Keyword}' (page {Page}).", request.Keyword, pageNumber);
-                return Result<PaginatedResult<AgencyDto>>.Failure("No agencies found for the search criteria.");
+                return PaginatedResult<AgencyDto>.Failure("No agencies found for the search criteria.");
             }
 
             var data = agenciesPaged.Data.Select(a => new AgencyDto(
@@ -62,7 +62,7 @@ namespace Application.Features.Agencies.Queries.SearchAgencies
                 a.Address?.ToFullAddress()
             )).ToList();
 
-            var resultPage = PaginatedResult<AgencyDto>.Create(data, agenciesPaged.TotalCount, pageNumber, pageSize);
+            var resultPage = PaginatedResult<AgencyDto>.Success(data, agenciesPaged.TotalCount, pageNumber, pageSize);
 
             try
             {
@@ -73,7 +73,7 @@ namespace Application.Features.Agencies.Queries.SearchAgencies
                 _logger.LogWarning(ex, "Failed to cache agencies search results for '{Keyword}'", request.Keyword);
             }
 
-            return Result<PaginatedResult<AgencyDto>>.Success(resultPage);
+            return resultPage;
         }
     }
 }

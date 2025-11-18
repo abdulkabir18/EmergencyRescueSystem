@@ -1,32 +1,20 @@
 ﻿namespace Application.Common.Dtos
 {
-    public class PaginatedResult<T> : Result<List<T>>
+    public class PaginatedResult<T>
     {
+        public bool Succeeded { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<T> Data { get; set; } = new();
         public int PageNumber { get; private set; }
         public int PageSize { get; private set; }
         public int TotalCount { get; private set; }
-        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
-        public bool HasPreviousPage => PageNumber > 1;
-        public bool HasNextPage => PageNumber < TotalPages;
+        public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
 
-        private PaginatedResult(List<T> data, int totalCount, int pageNumber, int pageSize)
-        {
-            Succeeded = true;
-            Message = "Success";
-            Data = data;
-            TotalCount = totalCount;
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-        }
-
-        public static PaginatedResult<T> Create(List<T> data, int totalCount, int pageNumber, int pageSize)
-            => new PaginatedResult<T>(data, totalCount, pageNumber, pageSize);
+        public static PaginatedResult<T> Success(List<T> data, int totalCount, int page, int size)
+            => new() { Succeeded = true, Message = "Success", Data = data, TotalCount = totalCount, PageNumber = page, PageSize = size };
 
         public static PaginatedResult<T> Failure(string message)
-            => new PaginatedResult<T>(new List<T>(), 0, 1, 10)
-            {
-                Succeeded = false,
-                Message = message
-            };
+            => new() { Succeeded = false, Message = message, Data = new(), TotalCount = 0, PageNumber = 1, PageSize = 10 };
     }
+
 }

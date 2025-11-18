@@ -24,7 +24,7 @@ namespace Domain.Entities
             Role = role;
             IsActive = true;
 
-            //AddDomainEvent(new ResponderAssignedToIncidentEvent(Id, responderId, role));
+            AddDomainEvent(new ResponderAssignedToIncidentEvent(Id, responderId, role));
         }
 
         public void Deactivate() => IsActive = false;

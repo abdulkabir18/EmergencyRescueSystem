@@ -30,7 +30,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<User>.Create(users, totalCount, pageNumber, pageSize);
+            return PaginatedResult<User>.Success(users, totalCount, pageNumber, pageSize);
         }
 
         public async Task<PaginatedResult<User>> GetAllUsersByRoleAsync(UserRole role, int pageNumber, int pageSize)
@@ -45,7 +45,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<User>.Create(users, totalCount, pageNumber, pageSize);
+            return PaginatedResult<User>.Success(users, totalCount, pageNumber, pageSize);
         }
 
         public async Task<User?> GetAsync(Expression<Func<User, bool>> expression)
@@ -122,7 +122,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<User>.Create(items, totalCount, pageNumber, pageSize);
+            return PaginatedResult<User>.Success(items, totalCount, pageNumber, pageSize);
         }
 
         //public async Task<PaginatedResult<User>> SearchUsersAsync(string keyword, int pageNumber, int pageSize)

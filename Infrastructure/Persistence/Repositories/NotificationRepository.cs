@@ -35,7 +35,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedResult<Notification>.Create(notifications, totalCount, pageNumber, pageSize);
+            return PaginatedResult<Notification>.Success(notifications, totalCount, pageNumber, pageSize);
         }
     }
 }

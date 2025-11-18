@@ -66,23 +66,21 @@ namespace Host.Controllers.V1
             return Ok(Result<string>.Success("Notification marked as read."));
         }
 
+        [Authorize]
         [HttpGet("user/{userId:guid}")]
         [SwaggerOperation(
             Summary = "Get paginated notifications for a user",
             Description = "Retrieves notifications for the specified user, paginated by page number and size."
         )]
         [ProducesResponseType(typeof(PaginatedResult<NotificationDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<PaginatedResult<NotificationDto>>> GetUserNotifications(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _notificationService.GetUserNotificationsAsync(userId, pageNumber, pageSize);
-            if (!result.Succeeded)
-                return BadRequest(result);
 
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("user/{userId:guid}/unread-count")]
         [SwaggerOperation(
             Summary = "Get unread notification count for a user",

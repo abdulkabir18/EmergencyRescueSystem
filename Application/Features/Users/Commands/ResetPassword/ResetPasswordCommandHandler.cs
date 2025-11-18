@@ -63,6 +63,8 @@ namespace Application.Features.Users.Commands.ResetPassword
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 await _cacheService.RemoveAsync(cacheKey);
+                await _cacheService.RemoveByPrefixAsync("GetAllUser");
+                await _cacheService.RemoveAsync($"GetUserByEmail_{user.Email.Value}");
 
                 _logger.LogInformation("Password changed successfully for user ID: {UserId}", userId);
                 return Result<bool>.Success(true, "Password changed successfully.");

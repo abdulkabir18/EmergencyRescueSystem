@@ -29,11 +29,10 @@ namespace Host.Controllers.V1
 
         [HttpGet("all")]
         [SwaggerOperation(Summary = "Get all responders (paginated)")]
-        [ProducesResponseType(typeof(Result<PaginatedResult<ResponderDto>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<Result<PaginatedResult<ResponderDto>>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(PaginatedResult<ResponderDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PaginatedResult<ResponderDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
         {
             var result = await _mediator.Send(new GetAllRespondersQuery(pageNumber, pageSize), cancellationToken);
-            if (!result.Succeeded) return BadRequest(result);
             return Ok(result);
         }
 
@@ -63,11 +62,10 @@ namespace Host.Controllers.V1
 
         [HttpGet("agency/{agencyId:guid}")]
         [SwaggerOperation(Summary = "Get responders for an agency (paginated)")]
-        [ProducesResponseType(typeof(Result<PaginatedResult<ResponderDto>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<Result<PaginatedResult<ResponderDto>>>> GetByAgency(Guid agencyId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(PaginatedResult<ResponderDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PaginatedResult<ResponderDto>>> GetByAgency(Guid agencyId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
         {
             var result = await _mediator.Send(new GetRespondersByAgencyQuery(agencyId, pageNumber, pageSize), cancellationToken);
-            if (!result.Succeeded) return BadRequest(result);
             return Ok(result);
         }
 
@@ -77,18 +75,16 @@ namespace Host.Controllers.V1
         public async Task<ActionResult<Result<List<ResponderDto>>>> GetByIncident(Guid incidentId, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetRespondersByIncidentQuery(incidentId), cancellationToken);
-            if (!result.Succeeded) return BadRequest(result);
             return Ok(result);
         }
 
         [HttpGet("nearby")]
         [SwaggerOperation(Summary = "Get nearby responders (paginated)")]
-        [ProducesResponseType(typeof(Result<PaginatedResult<ResponderDto>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<Result<PaginatedResult<ResponderDto>>>> GetNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] double radiusKm = 5.0, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(PaginatedResult<ResponderDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PaginatedResult<ResponderDto>>> GetNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] double radiusKm = 5.0, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
         {
             var query = new GetNearbyRespondersQuery(latitude, longitude, radiusKm, pageNumber, pageSize);
             var result = await _mediator.Send(query, cancellationToken);
-            if (!result.Succeeded) return BadRequest(result);
             return Ok(result);
         }
 
@@ -106,7 +102,7 @@ namespace Host.Controllers.V1
             var result = await _mediator.Send(new UpdateResponderLocationCommand(id, model), cancellationToken);
             if (!result.Succeeded)
             {
-                if (result.Message?.Contains("Unauthorized", StringComparison.OrdinalIgnoreCase) == true)
+                if (result.Message.Contains("Unauthorized", StringComparison.OrdinalIgnoreCase) == true)
                     return Unauthorized(result);
                 return BadRequest(result);
             }
@@ -128,7 +124,7 @@ namespace Host.Controllers.V1
             var result = await _mediator.Send(new UpdateResponderStatusCommand(id, model), cancellationToken);
             if (!result.Succeeded)
             {
-                if (result.Message?.Contains("Unauthorized", StringComparison.OrdinalIgnoreCase) == true)
+                if (result.Message.Contains("Unauthorized", StringComparison.OrdinalIgnoreCase) == true)
                     return Unauthorized(result);
                 return BadRequest(result);
             }

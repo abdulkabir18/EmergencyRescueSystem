@@ -67,6 +67,8 @@ namespace Application.Features.Users.Commands.SetProfileImage
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 await _cacheService.RemoveAsync(cacheKey);
+                await _cacheService.RemoveByPrefixAsync("GetAllUser");
+                await _cacheService.RemoveAsync($"GetUserByEmail_{user.Email.Value}");
 
                 _logger.LogInformation("Profile image set successfully for user {UserId}.", user.Id);
 

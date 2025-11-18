@@ -17,13 +17,15 @@ namespace Application.Features.Auth.Commands.ConfirmForgotPassword
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ConfirmForgotPasswordCommandHandler> _logger;
         private readonly IEmailService _emailService;
+        private readonly ICacheService _cacheService;
 
-        public ConfirmForgotPasswordCommandHandler(IUserRepository userRepository, IVerificationService verificationService, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork, ILogger<ConfirmForgotPasswordCommandHandler> logger, IEmailService emailService)
+        public ConfirmForgotPasswordCommandHandler(IUserRepository userRepository, ICacheService cacheService, IVerificationService verificationService, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork, ILogger<ConfirmForgotPasswordCommandHandler> logger, IEmailService emailService)
         {
             _userRepository = userRepository;
             _verificationService = verificationService;
             _passwordHasher = passwordHasher;
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
             _logger = logger;
             _emailService = emailService;
         }
@@ -69,6 +71,10 @@ namespace Application.Features.Auth.Commands.ConfirmForgotPassword
                     <p>Stay safe,<br><b>The NaijaRescue Team 🚨</b></p>";
 
                 await _emailService.SendEmailAsync(user.Email.Value, subject, body);
+
+                await _cacheService.RemoveAsync($"GetUserById_{user.Id}");
+                await _cacheService.RemoveByPrefixAsync("GetAllUser");
+                await _cacheService.RemoveAsync($"GetUserByEmail_{user.Email.Value}");
 
                 _logger.LogInformation("Password reset successful for user {Email}", request.Model.Email);
 
