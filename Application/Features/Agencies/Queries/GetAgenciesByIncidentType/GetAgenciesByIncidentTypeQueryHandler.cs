@@ -62,7 +62,15 @@ namespace Application.Features.Agencies.Queries.GetAgenciesByIncidentType
                 a.Email.Value,
                 a.PhoneNumber.Value,
                 a.LogoUrl,
-                a.Address?.ToFullAddress()
+                a.Address != null ? new AddressDto
+                {
+                    LGA = a.Address.LGA,
+                    Country = a.Address.Country,
+                    PostalCode = a.Address.PostalCode,
+                    State = a.Address.State,
+                    City = a.Address.City,
+                    Street = a.Address.Street
+                } : null
             )).ToList();
 
             var resultPage = PaginatedResult<AgencyDto>.Success(dtos, totalCount, pageNumber, pageSize);

@@ -44,6 +44,7 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
             var items = incidentsPaged.Data.Select(i => new IncidentDto
             {
                 Id = i.Id,
+                ReferenceNumber = i.ReferenceCode,
                 Title = i.Title,
                 Type = i.Type.ToString(),
                 Confidence = i.Confidence,
@@ -60,6 +61,8 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
                 } : null,
                 OccurredAt = i.OccurredAt,
                 UserId = i.UserId,
+                UserName = i.User.FullName,
+                UserContact = i.User.Email.Value,
                 Media = i.Medias?.Select(m => new IncidentMediaInfoDto(m.FileUrl, m.MediaType.ToString())).ToList() ?? [],
                 AssignedResponders = i.AssignedResponders?.Select(ar => new AssignedResponderDto
                 {

@@ -27,6 +27,16 @@ namespace Infrastructure.Persistence.Repositories
             _dbSet.Attach(entity);
         }
 
+        public async Task<int> CountAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _dbSet.CountAsync(expression);
+        }
+
+        public async Task<int> CountAsync()
+        {
+            return await _dbSet.CountAsync();
+        }
+
         public Task DeleteAsync(T entity)
         {
             entity.SoftDelete();

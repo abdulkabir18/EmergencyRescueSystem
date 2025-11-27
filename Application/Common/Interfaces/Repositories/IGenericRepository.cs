@@ -11,6 +11,8 @@ namespace Application.Common.Interfaces.Repositories
         Task<T?> GetForUpdateAsync(Guid id);
         void Attach(T entity);
         Task DeleteAsync(T entity);
+        Task<int> CountAsync(Expression<Func<T, bool>> expression);
+        Task<int> CountAsync();
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> expression);
         Task<IEnumerable<T>> GetAllAsync();
     }

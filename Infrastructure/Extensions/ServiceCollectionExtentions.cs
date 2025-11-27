@@ -3,7 +3,9 @@ using Application.Common.Interfaces.Repositories;
 using Application.Interfaces.Auth;
 using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
+using Application.Services;
 using brevo_csharp.Api;
 using Domain.Common.Security;
 using Infrastructure.Persistence.Context;
@@ -141,6 +143,14 @@ namespace Infrastructure.Extensions
             //services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
             //services.AddScoped<IMessageRepository, MessageRepository>();
             //services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+            services.AddScoped<IDashboardTrendsService, DashboardTrendsService>();
 
             return services;
         }

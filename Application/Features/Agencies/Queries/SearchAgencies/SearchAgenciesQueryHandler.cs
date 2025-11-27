@@ -59,7 +59,15 @@ namespace Application.Features.Agencies.Queries.SearchAgencies
                 a.Email.Value,
                 a.PhoneNumber.Value,
                 a.LogoUrl,
-                a.Address?.ToFullAddress()
+                a.Address != null ? new AddressDto
+                {
+                    City = a.Address.City,
+                    Country = a.Address.Country,
+                    LGA = a.Address.LGA,
+                    PostalCode = a.Address.PostalCode,
+                    State = a.Address.State,
+                    Street = a.Address.Street
+                } : null
             )).ToList();
 
             var resultPage = PaginatedResult<AgencyDto>.Success(data, agenciesPaged.TotalCount, pageNumber, pageSize);

@@ -38,11 +38,12 @@ namespace Infrastructure.Services.Notifications
 
             await _realtimeNotifier.SendToUserAsync(recipientId, "ReceiveNotification", new
             {
-                notification.Id,
-                notification.Title,
-                notification.Message,
-                notification.Type,
-                notification.CreatedAt
+                Title = title,
+                Message = message,
+                Type = type.ToString(),
+                TargetId = targetId,
+                TargetType = targetType,
+                CreatedAt = notification.CreatedAt
             });
 
             await _cacheService.RemoveAsync(GetUnreadCacheKey(recipientId));
@@ -59,13 +60,14 @@ namespace Infrastructure.Services.Notifications
             await _notificationRepository.AddAsync(notifications);
             await _unitOfWork.SaveChangesAsync();
 
-            await _realtimeNotifier.SendToUsersAsync(recipientIds, "ReceiveNotification", new
+            await _realtimeNotifier.SendToUsersAsync(recipientIds, "ReceiveBroadcast", new
             {
                 Title = title,
                 Message = message,
                 Type = type.ToString(),
                 TargetId = targetId,
-                TargetType = targetType
+                TargetType = targetType,
+                CreatedAt = notifications.First().CreatedAt
             });
 
             foreach (var id in recipientIds)

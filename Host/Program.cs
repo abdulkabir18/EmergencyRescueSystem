@@ -5,6 +5,7 @@ using Host.Hubs;
 using Infrastructure.Extensions;
 using Infrastructure.Settings;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddApiVersioningWithExplorer();
 builder.Services.AddSwaggerWithJwt();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddRepositories();
+builder.Services.AddServices();
 builder.Services.AddCaching();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
@@ -83,14 +85,23 @@ app.UseExceptionHandler(config =>
         await context.Response.WriteAsJsonAsync(new { Message = "An unexpected error occurred." });
     });
 });
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
+    RequestPath = "/uploads"
+});
+
 app.MapControllers();
 
 app.MapHub<NotificationHub>("/hubs/notifications");
-
-app.UseCors("AllowFrontend");
 
 app.Run();

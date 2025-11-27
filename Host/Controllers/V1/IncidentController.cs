@@ -7,6 +7,7 @@ using Application.Features.Incidents.Commands.EscalateIncident;
 using Application.Features.Incidents.Commands.MarkInProgress;
 using Application.Features.Incidents.Commands.ResolveIncident;
 using Application.Features.Incidents.Dtos;
+using Application.Features.Incidents.Queries.GetAgencyIncidents;
 using Application.Features.Incidents.Queries.GetAllIncidents;
 using Application.Features.Incidents.Queries.GetCurrentUserIncidents;
 using Application.Features.Incidents.Queries.GetIncidentById;
@@ -173,6 +174,24 @@ namespace Host.Controllers.V1
         public async Task<ActionResult<Result<Guid>>> Cancel(Guid id, CancellationToken cancellationToken)
         {
             var result = await mediator.Send(new CancelIncidentCommand(id), cancellationToken);
+
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "SuperAdmin, AgencyAdmin")]
+        [HttpGet("agency/{agencyId:guid}/incidents")]
+        [SwaggerOperation(
+            Summary = "Get all incidents for a specific agency",
+            Description = "Retrieves all incidents where at least one assigned responder belongs to the given agency."
+        )]
+        [ProducesResponseType(typeof(Result<List<IncidentDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<List<IncidentDto>>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<List<IncidentDto>>>> GetIncidentsByAgency(Guid agencyId, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetAgencyIncidentsQuery(agencyId), cancellationToken);
 
             if (!result.Succeeded)
                 return BadRequest(result);

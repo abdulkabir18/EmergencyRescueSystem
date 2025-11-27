@@ -42,6 +42,7 @@ namespace Application.Features.Incidents.Queries.GetIncidentById
             var dto = new IncidentDto
             {
                 Id = incident.Id,
+                ReferenceNumber = incident.ReferenceCode,
                 Title = incident.Title,
                 Type = incident.Type.ToString(),
                 Confidence = incident.Confidence,
@@ -58,6 +59,8 @@ namespace Application.Features.Incidents.Queries.GetIncidentById
                 } : null,
                 OccurredAt = incident.OccurredAt,
                 UserId = incident.UserId,
+                UserName = incident.User.FullName,
+                UserContact = incident.User.Email.Value,
                 Media = incident.Medias?.Select(m => new IncidentMediaInfoDto(m.FileUrl, m.MediaType.ToString())).ToList() ?? [],
                 AssignedResponders = incident.AssignedResponders?.Select(ar => new AssignedResponderDto
                 {

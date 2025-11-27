@@ -37,11 +37,20 @@ namespace Application.Features.Users.Queries.GetProfile
 
             var dto = new UserProfileDto
             {
-                Address = user.Address?.ToFullAddress(),
+                Address = user.Address != null ? new AddressDto 
+                { 
+                    City = user.Address.City,
+                    Country = user.Address.Country,
+                    LGA =  user.Address.LGA,
+                    PostalCode = user.Address.PostalCode,
+                    State = user.Address.State,
+                    Street = user.Address.Street
+                } : null,
                 Email = user.Email.Value,
                 FullName = user.FullName,
                 Gender = user.Gender.ToString(),
                 Id = user.Id,
+                AgencyId = user.AgencyId,
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 Role = user.Role.ToString()
             };

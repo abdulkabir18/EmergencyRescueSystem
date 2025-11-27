@@ -26,6 +26,7 @@ namespace Infrastructure.Persistence.Repositories
         public async Task<Incident?> GetByIdWithDetailsAsync(Guid id)
         {
             return await _dbContext.Incidents
+                .Include(i => i.User)
                 .Include(i => i.AssignedResponders)
                     .ThenInclude(r => r.Responder)
                     .ThenInclude(res => res.User)
@@ -59,6 +60,7 @@ namespace Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .Where(i => !i.IsDeleted)
                 .Include(i => i.Medias)
+                .Include(i => i.User)
                 .Include(i => i.AssignedResponders)
                     .ThenInclude(ar => ar.Responder)
                         .ThenInclude(r => r.User)
@@ -86,6 +88,7 @@ namespace Infrastructure.Persistence.Repositories
             var query = _dbContext.Incidents
                 .AsNoTracking()
                 .Where(i => !i.IsDeleted && i.UserId == userId)
+                .Include(i => i.User)
                 .Include(i => i.Medias)
                 .Include(i => i.AssignedResponders)
                     .ThenInclude(ar => ar.Responder)
@@ -101,6 +104,18 @@ namespace Infrastructure.Persistence.Repositories
                 .ToListAsync();
 
             return PaginatedResult<Incident>.Success(items, totalCount, pageNumber, pageSize);
+        }
+
+        public async Task<ICollection<Incident>> GetIncidentsByAgencyIdAsync(Guid agencyId)
+        {
+            return await _dbContext.Incidents
+            .Where(i => i.AssignedResponders
+                .Any(ar => ar.Responder.AgencyId == agencyId))
+            .Include(i => i.AssignedResponders)
+                .ThenInclude(ar => ar.Responder)
+            .Include(i => i.Medias)
+            .Include(i => i.Address)
+            .ToListAsync();
         }
     }
 }

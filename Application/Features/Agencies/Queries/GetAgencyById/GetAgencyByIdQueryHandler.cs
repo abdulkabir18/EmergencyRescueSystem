@@ -45,7 +45,15 @@ namespace Application.Features.Agencies.Queries.GetAgencyById
                 agency.Email.Value,
                 agency.PhoneNumber.Value,
                 agency.LogoUrl,
-                agency.Address?.ToFullAddress()
+                agency.Address != null ? new AddressDto
+                {
+                    Street = agency.Address.Street,
+                    City = agency.Address.City,
+                    State = agency.Address.State,
+                    PostalCode = agency.Address.PostalCode,
+                    Country = agency.Address.Country,
+                    LGA = agency.Address.LGA
+                } : null
             );
 
             try

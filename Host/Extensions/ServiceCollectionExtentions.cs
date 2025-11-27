@@ -2,9 +2,11 @@
 using Application.Interfaces.CurrentUser;
 using Host.Services;
 using Infrastructure.Services.CurrentUser;
+using Infrastructure.Services.SignalR;
 using Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -16,6 +18,7 @@ namespace Host.Extensions
         public static IServiceCollection AddHubServices(this IServiceCollection services)
         {
             services.AddSignalR();
+            services.AddSingleton<IUserIdProvider, ClaimUserIdProvider>();
             services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
             return services;
@@ -109,6 +112,23 @@ namespace Host.Extensions
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                     ValidateLifetime = true
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"].FirstOrDefault();
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/notifications")) 
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             }).AddGoogle(options =>
             {

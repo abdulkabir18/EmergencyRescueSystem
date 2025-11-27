@@ -1,13 +1,12 @@
 using Application.Common.Dtos;
 using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
-using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Agencies.Queries.GetSupportedIncidents
 {
-    public class GetAgencySupportedIncidentsQueryHandler : IRequestHandler<GetAgencySupportedIncidentsQuery, Result<List<IncidentType>>>
+    public class GetAgencySupportedIncidentsQueryHandler : IRequestHandler<GetAgencySupportedIncidentsQuery, Result<List<string>>>
     {
         private readonly IAgencyRepository _agencyRepository;
         private readonly ICacheService _cacheService;
@@ -23,20 +22,20 @@ namespace Application.Features.Agencies.Queries.GetSupportedIncidents
             _logger = logger;
         }
 
-        public async Task<Result<List<IncidentType>>> Handle(GetAgencySupportedIncidentsQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<string>>> Handle(GetAgencySupportedIncidentsQuery request, CancellationToken cancellationToken)
         {
             if (request.AgencyId == Guid.Empty)
-                return Result<List<IncidentType>>.Failure("Invalid agency id.");
+                return Result<List<string>>.Failure("Invalid agency id.");
 
             var cacheKey = $"agency:{request.AgencyId}:supported-incidents";
 
             try
             {
-                var cached = await _cacheService.GetAsync<List<IncidentType>>(cacheKey);
+                var cached = await _cacheService.GetAsync<List<string>>(cacheKey);
                 if (cached != null)
                 {
                     _logger.LogInformation("Supported incidents for agency {AgencyId} retrieved from cache.", request.AgencyId);
-                    return Result<List<IncidentType>>.Success(cached);
+                    return Result<List<string>>.Success(cached);
                 }
             }
             catch (Exception ex)
@@ -48,10 +47,16 @@ namespace Application.Features.Agencies.Queries.GetSupportedIncidents
             if (agency == null)
             {
                 _logger.LogWarning("Agency {AgencyId} not found.", request.AgencyId);
-                return Result<List<IncidentType>>.Success([],$"Agency with ID {request.AgencyId} not found.");
+                return Result<List<string>>.Success([],$"Agency with ID {request.AgencyId} not found.");
             }
 
-            var supported = agency.SupportedIncidents?.ToList() ?? new List<IncidentType>();
+            var supportedType = agency.SupportedIncidents.ToList();
+            List<string> supported = [];
+
+            foreach(var type in supportedType)
+            {
+                supported.Add(type.ToString());
+            }
 
             try
             {
@@ -62,7 +67,7 @@ namespace Application.Features.Agencies.Queries.GetSupportedIncidents
                 _logger.LogWarning(ex, "Failed to cache supported incidents for agency {AgencyId}", request.AgencyId);
             }
 
-            return Result<List<IncidentType>>.Success(supported);
+            return Result<List<string>>.Success(supported);
         }
     }
 }

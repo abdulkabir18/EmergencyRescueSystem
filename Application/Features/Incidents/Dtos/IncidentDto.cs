@@ -16,6 +16,7 @@ namespace Application.Features.Incidents.Dtos
     public record IncidentDto
     {
         public Guid Id { get; set; }
+        public string ReferenceNumber { get; set; } = string.Empty;
         public string? Title { get; set; }
         public string Type { get; set; } = string.Empty;
         public double? Confidence { get; set; }
@@ -24,6 +25,8 @@ namespace Application.Features.Incidents.Dtos
         public AddressDto? Address { get; set; }
         public DateTime OccurredAt { get; set; }
         public Guid UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string UserContact { get; set; } = string.Empty;
         public List<IncidentMediaInfoDto> Media { get; set; } = new();
         public List<AssignedResponderDto> AssignedResponders { get; set; } = new();
     }

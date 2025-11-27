@@ -11,5 +11,6 @@ namespace Application.Interfaces.Repositories
         Task<bool> ExistsAsync(Guid id);
         Task<PaginatedResult<Incident>> GetAllIncidentsAsync(int pageNumber, int pageSize);
         Task<PaginatedResult<Incident>> GetIncidentsByUserAsync(Guid userId, int pageNumber, int pageSize);
+        Task<ICollection<Incident>> GetIncidentsByAgencyIdAsync(Guid agencyId);
     }
 }
