@@ -63,32 +63,32 @@ namespace Infrastructure.Persistence.Repositories
             if (string.IsNullOrWhiteSpace(keyword))
                 return await GetAllAgenciesAsync(pageNumber, pageSize);
 
-            keyword = keyword.Trim();
+            keyword = keyword.Trim().ToLower();
 
             var query = _dbContext.Agencies
                 .AsNoTracking()
                 .Where(a => !a.IsDeleted &&
                             (
-                                EF.Functions.Like(a.Name, $"%{keyword}%")
+                                EF.Functions.Like(a.Name.ToLower(), $"%{keyword}%")
                                 || (a.Address != null && (
-                                    EF.Functions.Like(a.Address.Street ?? string.Empty, $"%{keyword}%")
-                                    || EF.Functions.Like(a.Address.City ?? string.Empty, $"%{keyword}%")
-                                    || EF.Functions.Like(a.Address.State ?? string.Empty, $"%{keyword}%")
-                                    || EF.Functions.Like(a.Address.Country ?? string.Empty, $"%{keyword}%")
+                                    EF.Functions.Like(a.Address.Street.ToLower() ?? string.Empty, $"%{keyword}%")
+                                    || EF.Functions.Like(a.Address.City.ToLower() ?? string.Empty, $"%{keyword}%")
+                                    || EF.Functions.Like(a.Address.State.ToLower() ?? string.Empty, $"%{keyword}%")
+                                    || EF.Functions.Like(a.Address.Country.ToLower() ?? string.Empty, $"%{keyword}%")
                                 ))
                             ));
 
             try
             {
                 query = query.Where(a =>
-                    EF.Functions.Like(a.Name, $"%{keyword}%")
+                    EF.Functions.Like(a.Name.ToLower(), $"%{keyword}%")
                     || EF.Functions.Like(a.Email, $"%{keyword}%")
                     || EF.Functions.Like(a.PhoneNumber, $"%{keyword}%")
                     || (a.Address != null && (
-                        EF.Functions.Like(a.Address.Street ?? string.Empty, $"%{keyword}%")
-                        || EF.Functions.Like(a.Address.City ?? string.Empty, $"%{keyword}%")
-                        || EF.Functions.Like(a.Address.State ?? string.Empty, $"%{keyword}%")
-                        || EF.Functions.Like(a.Address.Country ?? string.Empty, $"%{keyword}%")
+                        EF.Functions.Like(a.Address.Street.ToLower() ?? string.Empty, $"%{keyword}%")
+                        || EF.Functions.Like(a.Address.City.ToLower() ?? string.Empty, $"%{keyword}%")
+                        || EF.Functions.Like(a.Address.State.ToLower() ?? string.Empty, $"%{keyword}%")
+                        || EF.Functions.Like(a.Address.Country.ToLower() ?? string.Empty, $"%{keyword}%")
                     )));
             }
             catch

@@ -26,7 +26,7 @@ namespace Domain.Entities
 
             UserId = userId;
             AgencyId = agencyId;
-            Status = ResponderStatus.Unreachable;
+            Status = ResponderStatus.Available;
         }
 
         public void UpdateResponderStatus(ResponderStatus status)

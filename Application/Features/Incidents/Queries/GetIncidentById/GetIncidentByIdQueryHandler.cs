@@ -61,7 +61,7 @@ namespace Application.Features.Incidents.Queries.GetIncidentById
                 UserId = incident.UserId,
                 UserName = incident.User.FullName,
                 UserContact = incident.User.Email.Value,
-                Media = incident.Medias?.Select(m => new IncidentMediaInfoDto(m.FileUrl, m.MediaType.ToString())).ToList() ?? [],
+                Media = new IncidentMediaInfoDto(incident.Media.FileUrl, incident.Media.MediaType.ToString()),
                 AssignedResponders = incident.AssignedResponders?.Select(ar => new AssignedResponderDto
                 {
                     Id = ar.Id,

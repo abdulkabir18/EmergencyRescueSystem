@@ -27,7 +27,7 @@ namespace Application.Features.Incidents.Dtos
         public Guid UserId { get; set; }
         public string UserName { get; set; } = string.Empty;
         public string UserContact { get; set; } = string.Empty;
-        public List<IncidentMediaInfoDto> Media { get; set; } = new();
+        public IncidentMediaInfoDto Media { get; set; } = default!;
         public List<AssignedResponderDto> AssignedResponders { get; set; } = new();
     }
 }

@@ -20,7 +20,7 @@ namespace Domain.Entities
         public Guid UserId { get; private set; }
         public User User { get; private set; } = default!;
 
-        public ICollection<Media> Medias { get; private set; } = [];
+        public Media Media { get; private set; } = default!;
         public ICollection<IncidentResponder> AssignedResponders { get; private set; } = [];
 
         private Incident() { }
@@ -46,10 +46,10 @@ namespace Domain.Entities
 
         public void AddIncidentType(IncidentType type)
         {
-            if (Type != IncidentType.Unknown)
+            if (Type is IncidentType.Unknown)
                 throw new InvalidOperationException("Incident type cannot be changed once set.");
 
-            if (type == IncidentType.Unknown)
+            if (type is IncidentType.Unknown)
                 throw new InvalidOperationException("Incident type can't be assigned to unknown");
 
             Type = type;
@@ -62,7 +62,7 @@ namespace Domain.Entities
 
             AssignedResponders.Add(new IncidentResponder(this.Id, responderId, role));
 
-            if (Status == IncidentStatus.Pending)
+            if (Status is IncidentStatus.Pending)
                 Status = IncidentStatus.Reported;
 
             AddDomainEvent(new ResponderAssignedToIncidentEvent(Id, responderId, role));
@@ -70,8 +70,8 @@ namespace Domain.Entities
 
         public void MarkInProgress()
         {
-            if (Status != IncidentStatus.Reported)
-                throw new InvalidOperationException("Incident must be reported before it can be marked in progress.");
+            //if ((Status != IncidentStatus.Reported) || (Status != IncidentStatus.Analyzed))
+            //    throw new InvalidOperationException("Incident must be reported/analyzed before it can be marked in progress.");
 
             Status = IncidentStatus.InProgress;
             AddDomainEvent(new IncidentStatusChangedEvent(Id, Status));
@@ -118,7 +118,7 @@ namespace Domain.Entities
             if (!Enum.IsDefined(typeof(MediaType), mediaType))
                 throw new ArgumentException("Invalid media type.", nameof(mediaType));
 
-            Medias.Add(new Media(fileUrl, mediaType));
+            Media = new Media(fileUrl, mediaType);
 
             //AddDomainEvent(new IncidentMediaAddedEvent(Id, fileUrl, mediaType));
         }
@@ -138,7 +138,7 @@ namespace Domain.Entities
             Title = suggestedTitle;
             Confidence = confidence;
 
-            if (Type == IncidentType.Unknown)
+            if (Type is IncidentType.Unknown)
                 Type = detectedType;
 
             Status = IncidentStatus.Analyzed;

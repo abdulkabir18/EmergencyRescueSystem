@@ -30,7 +30,6 @@ namespace Infrastructure.Persistence.Repositories
                 .Include(i => i.AssignedResponders)
                     .ThenInclude(r => r.Responder)
                     .ThenInclude(res => res.User)
-                .Include(i => i.Medias)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(i => i.Id == id);
         }
@@ -59,7 +58,6 @@ namespace Infrastructure.Persistence.Repositories
             var query = _dbContext.Incidents
                 .AsNoTracking()
                 .Where(i => !i.IsDeleted)
-                .Include(i => i.Medias)
                 .Include(i => i.User)
                 .Include(i => i.AssignedResponders)
                     .ThenInclude(ar => ar.Responder)
@@ -89,7 +87,6 @@ namespace Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .Where(i => !i.IsDeleted && i.UserId == userId)
                 .Include(i => i.User)
-                .Include(i => i.Medias)
                 .Include(i => i.AssignedResponders)
                     .ThenInclude(ar => ar.Responder)
                         .ThenInclude(r => r.User)
@@ -111,10 +108,28 @@ namespace Infrastructure.Persistence.Repositories
             return await _dbContext.Incidents
             .Where(i => i.AssignedResponders
                 .Any(ar => ar.Responder.AgencyId == agencyId))
+            .Include(i => i.User)
             .Include(i => i.AssignedResponders)
                 .ThenInclude(ar => ar.Responder)
-            .Include(i => i.Medias)
-            .Include(i => i.Address)
+                .ThenInclude(ar => ar.User)
+            .AsSplitQuery()
+            .ToListAsync();
+        }
+
+        public async Task<ICollection<Incident>> GetResponderIncidentsAsync(Guid responderId)
+        {
+            return await _dbContext.Incidents
+            .AsNoTracking()
+            .Where(i =>
+                !i.IsDeleted &&
+                i.AssignedResponders.Any(ar => ar.ResponderId == responderId)
+            )
+            .Include(i => i.User)
+            .Include(i => i.AssignedResponders)
+                .ThenInclude(ar => ar.Responder)
+                .ThenInclude(r => r.User)
+            .OrderByDescending(i => i.CreatedAt)
+            .AsSplitQuery()
             .ToListAsync();
         }
     }

@@ -51,6 +51,7 @@ namespace Application.Features.Users.Queries.GetProfile
                 Gender = user.Gender.ToString(),
                 Id = user.Id,
                 AgencyId = user.AgencyId,
+                ResponderId = user.ResponderId,
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 Role = user.Role.ToString()
             };

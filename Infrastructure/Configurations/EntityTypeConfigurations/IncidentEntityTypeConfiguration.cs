@@ -36,13 +36,10 @@ namespace Infrastructure.Configurations.EntityTypeConfigurations
                         .HasPrecision(9, 6);
             });
 
-            builder.OwnsMany(i => i.Medias, medias =>
+            builder.OwnsOne(i => i.Media, medias =>
             {
-                medias.ToTable("Medias");
-                //medias.WithOwner("IncidentId");
                 medias.Property(m => m.MediaType).IsRequired();
                 medias.Property(m => m.FileUrl).IsRequired().HasMaxLength(150);
-
             });
 
             builder.OwnsOne(i => i.Address, address =>

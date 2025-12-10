@@ -36,7 +36,7 @@ namespace Application.Features.Incidents.EventHandlers
                     return;
                 }
 
-                var media = incident.Medias?.FirstOrDefault();
+                var media = incident.Media;
                 if (!string.IsNullOrWhiteSpace(media?.FileUrl))
                 {
                     try

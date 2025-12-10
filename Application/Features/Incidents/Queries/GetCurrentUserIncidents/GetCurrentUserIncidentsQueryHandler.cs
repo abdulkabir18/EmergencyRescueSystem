@@ -75,7 +75,7 @@ namespace Application.Features.Incidents.Queries.GetCurrentUserIncidents
                 UserId = i.UserId,
                 UserName = i.User.FullName,
                 UserContact = i.User.Email.Value,
-                Media = i.Medias?.Select(m => new IncidentMediaInfoDto(m.FileUrl, m.MediaType.ToString())).ToList() ?? new List<IncidentMediaInfoDto>(),
+                Media = new IncidentMediaInfoDto(i.Media.FileUrl, i.Media.MediaType.ToString()),
                 AssignedResponders = i.AssignedResponders?.Select(ar => new AssignedResponderDto
                 {
                     Id = ar.Id,

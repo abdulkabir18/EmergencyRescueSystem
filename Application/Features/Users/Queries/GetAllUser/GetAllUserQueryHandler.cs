@@ -35,6 +35,7 @@ namespace Application.Features.Users.Queries.GetAllUser
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 Gender = user.Gender.ToString(),
                 IsActive = user.IsActive,
+                CreatedAt =user.CreatedAt,
                 Address = user.Address != null ? new AddressDto
                 {
                     Street = user.Address.Street,

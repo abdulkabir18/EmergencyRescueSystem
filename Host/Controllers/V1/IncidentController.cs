@@ -11,6 +11,7 @@ using Application.Features.Incidents.Queries.GetAgencyIncidents;
 using Application.Features.Incidents.Queries.GetAllIncidents;
 using Application.Features.Incidents.Queries.GetCurrentUserIncidents;
 using Application.Features.Incidents.Queries.GetIncidentById;
+using Application.Features.Incidents.Queries.GetResponderIncidents;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -198,5 +199,24 @@ namespace Host.Controllers.V1
 
             return Ok(result);
         }
+
+        [Authorize(Roles = "Responder, SuperAdmin, AgencyAdmin")]
+        [HttpGet("responder/{responderId:guid}/incidents")]
+        [SwaggerOperation(
+            Summary = "Get incidents attended by a specific responder",
+            Description = "Retrieves all incidents where this responder has been assigned or has participated."
+        )]
+        [ProducesResponseType(typeof(Result<List<IncidentDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<List<IncidentDto>>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<List<IncidentDto>>>> GetResponderIncidents(Guid responderId, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetResponderIncidentsQuery(responderId), cancellationToken);
+
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
     }
 }

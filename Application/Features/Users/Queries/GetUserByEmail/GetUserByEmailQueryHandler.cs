@@ -43,6 +43,7 @@ namespace Application.Features.Users.Queries.GetUserByEmail
                 Email = user.Email.Value,
                 Role = user.Role.ToString(),
                 ProfilePictureUrl = user.ProfilePictureUrl,
+                CreatedAt = user.CreatedAt,
                 Address = user.Address != null ? new AddressDto
                 {
                     Street = user.Address.Street,

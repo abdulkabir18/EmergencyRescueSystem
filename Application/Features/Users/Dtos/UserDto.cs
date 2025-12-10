@@ -12,5 +12,6 @@ namespace Application.Features.Users.Dtos
         public string Gender { get; set; } = default!;
         public AddressDto? Address { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

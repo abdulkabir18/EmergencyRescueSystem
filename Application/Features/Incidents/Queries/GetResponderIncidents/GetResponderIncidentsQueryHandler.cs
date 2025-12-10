@@ -3,23 +3,23 @@ using Application.Features.Incidents.Dtos;
 using Application.Interfaces.Repositories;
 using MediatR;
 
-namespace Application.Features.Incidents.Queries.GetAgencyIncidents
+namespace Application.Features.Incidents.Queries.GetResponderIncidents
 {
-    public class GetAgencyIncidentsQueryHandler : IRequestHandler<GetAgencyIncidentsQuery, Result<List<IncidentDto>>>
+    public class GetResponderIncidentsQueryHandler : IRequestHandler<GetResponderIncidentsQuery, Result<List<IncidentDto>>>
     {
         private readonly IIncidentRepository _incidentRepository;
 
-        public GetAgencyIncidentsQueryHandler(IIncidentRepository incidentRepository)
+        public GetResponderIncidentsQueryHandler(IIncidentRepository incidentRepository)
         {
             _incidentRepository = incidentRepository;
         }
 
-        public async Task<Result<List<IncidentDto>>> Handle(GetAgencyIncidentsQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<IncidentDto>>> Handle(GetResponderIncidentsQuery request, CancellationToken cancellationToken)
         {
-            if (request.AgencyId == Guid.Empty)
-                return Result<List<IncidentDto>>.Failure("Agency ID is required.");
+            if (request.ResponderId == Guid.Empty)
+                return Result<List<IncidentDto>>.Failure("Responder ID is required.");
 
-            var incidents = await _incidentRepository.GetIncidentsByAgencyIdAsync(request.AgencyId);
+            var incidents = await _incidentRepository.GetResponderIncidentsAsync(request.ResponderId);
 
             var result = incidents.Select(i => new IncidentDto
             {
@@ -61,7 +61,7 @@ namespace Application.Features.Incidents.Queries.GetAgencyIncidents
                 }).ToList()
             }).ToList();
 
-            return Result<List<IncidentDto>>.Success(result, "Incidents retrieved.");
+            return Result<List<IncidentDto>>.Success(result, "Responder incident history retrieved.");
         }
     }
 }

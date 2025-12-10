@@ -26,6 +26,7 @@ namespace Application.Features.Users.Queries.SearchUsers
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email.Value,
+                CreatedAt = user.CreatedAt,
                 Role = user.Role.ToString(),
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 Gender = user.Gender.ToString(),
