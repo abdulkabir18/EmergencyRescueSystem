@@ -57,7 +57,8 @@ namespace Application.Features.Incidents.Queries.GetAgencyIncidents
                     ResponderId = ar.ResponderId,
                     UserId = ar.Responder.UserId,
                     Role = ar.Role.ToString(),
-                    ResponderName = ar.Responder.User.FullName
+                    ResponderName = ar.Responder.User.FullName,
+                    AgencyName = ar.Responder?.Agency.Name
                 }).ToList()
             }).ToList();
 

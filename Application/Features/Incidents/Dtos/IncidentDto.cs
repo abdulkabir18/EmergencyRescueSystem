@@ -11,6 +11,7 @@ namespace Application.Features.Incidents.Dtos
         public Guid UserId { get; set; }
         public string Role { get; set; } = string.Empty;
         public string? ResponderName { get; set; }
+        public string? AgencyName { get; set; }
     }
 
     public record IncidentDto

@@ -64,7 +64,7 @@ namespace Application.Features.Responders.Commands.UpdateResponderStatus
                 {
                     await _cacheService.RemoveAsync($"responder:{responder.Id}");
                     await _cacheService.RemoveAsync($"responder:user:{responder.UserId}");
-                    await _cacheService.RemoveByPrefixAsync("responder:");
+                    await _cacheService.RemoveByPrefixAsync("responders:");
                 }
                 catch (Exception ex)
                 {

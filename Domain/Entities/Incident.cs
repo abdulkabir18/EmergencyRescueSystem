@@ -85,8 +85,8 @@ namespace Domain.Entities
 
         public void MarkResolved()
         {
-            if (Status != IncidentStatus.InProgress)
-                throw new InvalidOperationException("Incident must be in progress before it can be resolved.");
+            //if (Status != IncidentStatus.InProgress)
+            //    throw new InvalidOperationException("Incident must be in progress before it can be resolved.");
 
             Status = IncidentStatus.Resolved;
             AddDomainEvent(new IncidentStatusChangedEvent(Id, Status));

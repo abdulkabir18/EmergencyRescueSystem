@@ -70,7 +70,8 @@ namespace Application.Features.Incidents.Queries.GetAllIncidents
                     ResponderId = ar.ResponderId,
                     UserId = ar.Responder?.UserId ?? Guid.Empty,
                     Role = ar.Role.ToString(),
-                    ResponderName = ar.Responder?.User?.FullName
+                    ResponderName = ar.Responder?.User?.FullName,
+                    AgencyName = ar.Responder?.Agency.Name
                 }).ToList() ?? []
             }).ToList();
 
