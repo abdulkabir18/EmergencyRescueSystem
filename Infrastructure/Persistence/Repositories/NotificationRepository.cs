@@ -37,5 +37,23 @@ namespace Infrastructure.Persistence.Repositories
 
             return PaginatedResult<Notification>.Success(notifications, totalCount, pageNumber, pageSize);
         }
+
+        public async Task<int> MarkAllAsReadAsync(Guid userId)
+        {
+            var toUpdate = await _dbContext.Notifications
+                .Where(n => n.RecipientId == userId && !n.IsRead && !n.IsDeleted)
+                .ToListAsync();
+
+            if (toUpdate == null || toUpdate.Count == 0)
+                return 0;
+
+            foreach (var n in toUpdate)
+            {
+                n.MarkAsRead();
+            }
+
+            _dbContext.Notifications.UpdateRange(toUpdate);
+            return toUpdate.Count;
+        }
     }
 }

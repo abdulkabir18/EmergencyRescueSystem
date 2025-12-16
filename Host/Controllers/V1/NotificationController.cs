@@ -97,5 +97,32 @@ namespace Host.Controllers.V1
 
             return Ok(Result<int>.Success(count, "Unread count retrieved successfully."));
         }
+
+        [Authorize]
+        [HttpPatch("user/{userId:guid}/mark-all-read")]
+        [SwaggerOperation(
+            Summary = "Mark all notifications as read for a user",
+            Description = "Marks all unread notifications as read for the specified user. User must be the owner or an admin."
+        )]
+        [ProducesResponseType(typeof(Result<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<Result<string>>> MarkAllRead(Guid userId)
+        {
+            var currentUserIdClaim = User.FindFirst("nameidentifier")?.Value;
+            if (!Guid.TryParse(currentUserIdClaim, out var currentUserId))
+            {
+                return Unauthorized(Result<string>.Failure("Unauthorized"));
+            }
+
+            var isAdmin = User.IsInRole("SuperAdmin") || User.IsInRole("AgencyAdmin");
+            if (currentUserId != userId && !isAdmin)
+            {
+                return Forbid();
+            }
+
+            await _notificationService.MarkAllAsReadAsync(userId);
+            return Ok(Result<string>.Success("All notifications marked as read."));
+        }
     }
 }

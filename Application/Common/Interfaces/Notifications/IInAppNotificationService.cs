@@ -10,5 +10,6 @@ namespace Application.Common.Interfaces.Notifications
         Task MarkAsReadAsync(Guid notificationId);
         Task<PaginatedResult<NotificationDto>> GetUserNotificationsAsync(Guid userId, int pageNumber = 1, int pageSize = 10);
         Task<int> GetUnreadCountAsync(Guid userId);
+        Task MarkAllAsReadAsync(Guid userId);
     }
 }

@@ -154,6 +154,34 @@ namespace Infrastructure.Services.Notifications
             return count;
         }
 
+        public async Task MarkAllAsReadAsync(Guid userId)
+        {
+            bool isExist = await _userRepository.IsUserExistByIdAsync(userId);
+            if (!isExist)
+            {
+                _logger.LogWarning("Attempted to mark all notifications as read for non-existing user {UserId}", userId);
+                throw new KeyNotFoundException("User not found.");
+            }
+
+            var updatedCount = await _notificationRepository.MarkAllAsReadAsync(userId);
+            if (updatedCount > 0)
+            {
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            try
+            {
+                await _cacheService.RemoveAsync(GetUnreadCacheKey(userId));
+                await _cacheService.RemoveByPrefixAsync($"notifications:{userId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to invalidate notification caches for user {UserId}", userId);
+            }
+
+            _logger.LogInformation("Marked {Count} notifications as read for user {UserId}", updatedCount, userId);
+        }
+
         private static string GetUnreadCacheKey(Guid userId)
             => $"notifications:{userId}:unread-count";
     }

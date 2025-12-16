@@ -9,5 +9,6 @@ namespace Application.Interfaces.Repositories
         Task AddAsync(ICollection<Notification> notifications);
         Task<int> GetUnreadCountAsync(Guid userId);
         Task<PaginatedResult<Notification>> GetUserNotificationsAsync(Guid userId, int pageNumber = 1, int pageSize = 10);
+        Task<int> MarkAllAsReadAsync(Guid userId);
     }
 }
