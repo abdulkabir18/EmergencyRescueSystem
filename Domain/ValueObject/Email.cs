@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Domain.ValueObjects
+namespace Domain.ValueObject
 {
     public sealed class Email : IEquatable<Email>
     {

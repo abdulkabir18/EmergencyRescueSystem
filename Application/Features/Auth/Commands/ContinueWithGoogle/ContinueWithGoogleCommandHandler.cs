@@ -5,7 +5,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using Google.Apis.Auth;
 using MediatR;
 using Microsoft.Extensions.Logging;

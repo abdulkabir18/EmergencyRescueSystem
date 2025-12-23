@@ -1,7 +1,7 @@
 ﻿using Application.Common.Dtos;
 using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

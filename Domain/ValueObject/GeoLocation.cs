@@ -1,4 +1,4 @@
-﻿namespace Domain.ValueObjects
+﻿namespace Domain.ValueObject
 {
     public class GeoLocation
     {

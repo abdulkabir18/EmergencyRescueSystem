@@ -2,7 +2,7 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

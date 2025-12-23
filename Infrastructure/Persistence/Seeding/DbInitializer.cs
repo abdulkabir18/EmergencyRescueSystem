@@ -1,7 +1,7 @@
 ﻿using Domain.Common.Security;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 

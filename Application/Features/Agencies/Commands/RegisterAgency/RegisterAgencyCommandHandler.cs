@@ -7,7 +7,7 @@ using Application.Interfaces.UnitOfWork;
 using Domain.Common.Security;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

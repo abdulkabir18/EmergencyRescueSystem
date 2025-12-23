@@ -1,6 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Enums;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 
 namespace Domain.Events
 {

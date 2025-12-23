@@ -5,7 +5,7 @@ using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using Domain.Common.Security;
 using Domain.Common.Templates;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.Login

@@ -1,13 +1,14 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Domain.ValueObjects
+namespace Domain.ValueObject
 {
     public sealed class PhoneNumber : IEquatable<PhoneNumber>
     {
-        public string Value { get; private set; }
+        public string Value { get; } = default!;
 
         private static readonly Regex PhoneNumberRegex =
-            new(@"^(?:\+234|0)[789][01]\d{8}$", RegexOptions.Compiled);
+            new(@"^(?:\+234|0)(7[0-9]|8[0-9]|9[0-9])\d{7}$",
+                RegexOptions.Compiled);
 
         private PhoneNumber() { }
 
@@ -15,6 +16,8 @@ namespace Domain.ValueObjects
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("Phone number is required.", nameof(value));
+
+            value = value.Trim();
 
             if (!PhoneNumberRegex.IsMatch(value))
                 throw new ArgumentException("Invalid Nigerian phone number format.", nameof(value));
@@ -24,16 +27,17 @@ namespace Domain.ValueObjects
 
         private static string Normalize(string value)
         {
-            if (value.StartsWith("0"))
-                return "+234" + value[1..];
-            return value;
+            return value.StartsWith("0")
+                ? "+234" + value[1..]
+                : value;
         }
 
         public override string ToString() => Value;
 
         public override bool Equals(object? obj) => Equals(obj as PhoneNumber);
 
-        public bool Equals(PhoneNumber? other) => other is not null && Value == other.Value;
+        public bool Equals(PhoneNumber? other) =>
+            other is not null && Value == other.Value;
 
         public override int GetHashCode() => Value.GetHashCode();
 

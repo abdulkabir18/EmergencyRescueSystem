@@ -3,7 +3,7 @@ using Domain.Common.Security;
 using Domain.Common.Exceptions;
 using Domain.Enums;
 using Domain.Events;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 
 namespace Domain.Entities
 {

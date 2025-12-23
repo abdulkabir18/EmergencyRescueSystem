@@ -3,7 +3,7 @@ using Application.Interfaces.External;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using Domain.Common.Security;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

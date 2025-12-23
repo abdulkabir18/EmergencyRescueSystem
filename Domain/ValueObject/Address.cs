@@ -1,13 +1,13 @@
-﻿namespace Domain.ValueObjects
+﻿namespace Domain.ValueObject
 {
     public class Address
     {
-        public string Street { get; private set; }
-        public string City { get; private set; }
-        public string State { get; private set; }
-        public string LGA { get; private set; }
-        public string Country { get; private set; }
-        public string PostalCode { get; private set; }
+        public string Street { get; private set; } = default!;
+        public string City { get; private set; } = default!;
+        public string State { get; private set; } = default!;
+        public string? LGA { get; private set; }
+        public string Country { get; private set; } = default!;
+        public string PostalCode { get; private set; } = default!;
 
         private Address() { }
 

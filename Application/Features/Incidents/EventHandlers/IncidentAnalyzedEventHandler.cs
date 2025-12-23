@@ -4,7 +4,7 @@ using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Events;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Text;
@@ -167,7 +167,7 @@ namespace Application.Features.Incidents.EventHandlers
                     Distance = CalculateDistance(
                         incidentLocation.Latitude,
                         incidentLocation.Longitude,
-                        r.Coordinates.Latitude,
+                        r.Coordinates!.Latitude,
                         r.Coordinates.Longitude)
                 })
                 .OrderBy(x => x.Distance)

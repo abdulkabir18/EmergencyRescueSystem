@@ -3,7 +3,7 @@ using Application.Common.Dtos;
 using Application.Common.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.ValueObjects;
+using Domain.ValueObject;
 
 namespace Application.Interfaces.Repositories
 {
