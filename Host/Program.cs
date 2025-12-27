@@ -21,6 +21,7 @@ builder.Services.AddSwaggerWithJwt();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddRepositories();
 builder.Services.AddServices();
+builder.Services.AddHttpClient();
 builder.Services.AddCaching();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
