@@ -49,7 +49,7 @@ wwwroot/*
 
 
 # === Database Migrations ===
-Migrations/
+# Migrations/
 
 # === OS / Misc ===
 .DS_Store
