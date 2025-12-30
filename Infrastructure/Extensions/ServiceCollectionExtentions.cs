@@ -48,6 +48,23 @@ namespace Infrastructure.Extensions
             var conn = configuration.GetConnectionString("AppString");
 
             //Console.WriteLine(conn);
+            if (string.IsNullOrWhiteSpace(conn))
+            {
+                var databaseUrl = Environment.GetEnvironmentVariable("ConnectionStrings__AppString");
+                if (!string.IsNullOrWhiteSpace(databaseUrl))
+                {
+                    var uri = new Uri(databaseUrl);
+                    var userInfo = uri.UserInfo.Split(':');
+
+                    conn =
+                        $"Host={uri.Host};" +
+                        $"Port={uri.Port};" +
+                        $"Database={uri.AbsolutePath.Trim('/')};" +
+                        $"Username={userInfo[0]};" +
+                        $"Password={userInfo[1]};" +
+                        $"SSL Mode=Require;Trust Server Certificate=true";
+                }
+            }
 
             services.AddDbContext<ProjectDbContext>(options =>
                 options.UseNpgsql(conn)

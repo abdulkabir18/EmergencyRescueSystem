@@ -45,7 +45,7 @@ namespace Infrastructure.Persistence.Context
 
             foreach (var domainEvent in domainEvents)
             {
-                await _mediator.Publish(domainEvent);
+                await _mediator!.Publish(domainEvent);
             }
         }
     }

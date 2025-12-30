@@ -17,11 +17,31 @@ namespace Infrastructure.Persistence.Context
 
             var connectionString = configuration.GetConnectionString("AppString");
 
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("Connection string 'AppString' is missing or empty in appsettings.json.");
 
             //Console.WriteLine($"✅ Using Connection String: {connectionString}");
 
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+                if (!string.IsNullOrWhiteSpace(databaseUrl))
+                {
+                    var uri = new Uri(databaseUrl);
+                    var userInfo = uri.UserInfo.Split(':');
+
+                    connectionString =
+                        $"Host={uri.Host};" +
+                        $"Port={uri.Port};" +
+                        $"Database={uri.AbsolutePath.Trim('/')};" +
+                        $"Username={userInfo[0]};" +
+                        $"Password={userInfo[1]};" +
+                        $"SSL Mode=Require;Trust Server Certificate=true";
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("Connection string 'AppString' is missing or empty in appsettings.json.");
+            
             var optionsBuilder = new DbContextOptionsBuilder<ProjectDbContext>();
             optionsBuilder.UseNpgsql(connectionString);
 

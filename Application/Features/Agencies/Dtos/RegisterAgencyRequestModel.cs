@@ -13,20 +13,19 @@ namespace Application.Features.Agencies.Dtos
 
     public record IncidentTypesDto
     {
-        public List<IncidentTypeDto> SupportedIncidents { get; set; }
+        public List<IncidentTypeDto> SupportedIncidents { get; set; } = [];
     }
 
     public record RegisterAgencyFullRequestModel
     {
-        public RegisterUserRequestModel RegisterUserRequest { get; set; }
-        public string AgencyName { get; set; }
-        public string AgencyEmail { get; set; }
-        public string AgencyPhoneNumber { get; set; }
+        public RegisterUserRequestModel RegisterUserRequest { get; set; } = default!;
+        public string AgencyName { get; set; } = default!;
+        public string AgencyEmail { get; set; } = default!;
+        public string AgencyPhoneNumber { get; set; } = default!;
         public IFormFile? AgencyLogo { get; set; }
         public AddressDto? AgencyAddress { get; set; }
 
-        public List<string> SupportedIncidents { get; set; }
-
+        public List<string> SupportedIncidents { get; set; } = [];
         [JsonIgnore]
          public   List<IncidentType> IncidentTypesEnums =>
         ParseIncidentTypeList(SupportedIncidents);
