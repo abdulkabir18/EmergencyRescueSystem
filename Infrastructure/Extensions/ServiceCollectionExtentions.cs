@@ -43,38 +43,75 @@ namespace Infrastructure.Extensions
             return services;
         }
 
+        // public static IServiceCollection AddDbConnection(this IServiceCollection services, IConfiguration configuration)
+        // {
+        //     var conn = "";
+
+        //     // //Console.WriteLine(conn);
+        //     // if (string.IsNullOrWhiteSpace(conn))
+        //     // {
+        //         var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        //         if (!string.IsNullOrWhiteSpace(databaseUrl))
+        //         {
+        //             var uri = new Uri(databaseUrl);
+        //             var userInfo = uri.UserInfo.Split(':');
+
+        //             conn =
+        //                 $"Host={uri.Host};" +
+        //                 $"Port=5432;" +
+        //                 $"Database={uri.AbsolutePath.Trim('/')};" +
+        //                 $"Username={userInfo[0]};" +
+        //                 $"Password={userInfo[1]};" +
+        //                 $"SSL Mode=Require;Trust Server Certificate=true";
+        //         }
+        //     // }
+
+        //     services.AddDbContext<ProjectDbContext>(options =>
+        //         options.UseNpgsql(conn)
+        //         .EnableDetailedErrors()
+        //     );
+
+        //     services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        //     return services;
+        // }
+
         public static IServiceCollection AddDbConnection(this IServiceCollection services, IConfiguration configuration)
         {
-            var conn = configuration.GetConnectionString("AppString");
+            string? conn;
 
-            //Console.WriteLine(conn);
-            if (string.IsNullOrWhiteSpace(conn))
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+            if (!string.IsNullOrWhiteSpace(databaseUrl))
             {
-                var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-                if (!string.IsNullOrWhiteSpace(databaseUrl))
-                {
-                    var uri = new Uri(databaseUrl);
-                    var userInfo = uri.UserInfo.Split(':');
+                var uri = new Uri(databaseUrl);
+                var userInfo = uri.UserInfo.Split(':', 2);
 
-                    conn =
-                        $"Host={uri.Host};" +
-                        $"Port={uri.Port};" +
-                        $"Database={uri.AbsolutePath.Trim('/')};" +
-                        $"Username={userInfo[0]};" +
-                        $"Password={userInfo[1]};" +
-                        $"SSL Mode=Require;Trust Server Certificate=true";
-                }
+                conn =
+                    $"Host={uri.Host};" +
+                    $"Port={(uri.Port > 0 ? uri.Port : 5432)};" +
+                    $"Database={uri.AbsolutePath.Trim('/')};" +
+                    $"Username={userInfo[0]};" +
+                    $"Password={userInfo[1]};" +
+                    $"SSL Mode=Require;" +
+                    $"Trust Server Certificate=true";
+            }
+            else
+            {
+                conn = configuration.GetConnectionString("DefaultConnection")
+                    ?? throw new InvalidOperationException(
+                        "No database connection string configured.");
             }
 
             services.AddDbContext<ProjectDbContext>(options =>
                 options.UseNpgsql(conn)
-                .EnableDetailedErrors()
-            );
+                       .EnableDetailedErrors());
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }
+
 
         public static IServiceCollection AddCaching(this IServiceCollection services)
         {
