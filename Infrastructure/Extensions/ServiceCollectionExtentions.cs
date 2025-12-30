@@ -50,7 +50,7 @@ namespace Infrastructure.Extensions
             //Console.WriteLine(conn);
             if (string.IsNullOrWhiteSpace(conn))
             {
-                var databaseUrl = Environment.GetEnvironmentVariable("ConnectionStrings__AppString");
+                var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
                 if (!string.IsNullOrWhiteSpace(databaseUrl))
                 {
                     var uri = new Uri(databaseUrl);
