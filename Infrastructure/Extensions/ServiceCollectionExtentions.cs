@@ -22,9 +22,12 @@ using Infrastructure.Services.GoogleMaps;
 using Infrastructure.Services.Notifications;
 using Infrastructure.Services.Storage;
 using Infrastructure.Services.Storage.Manager;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Extensions
 {
@@ -98,14 +101,20 @@ namespace Infrastructure.Extensions
             }
             else
             {
-                conn = configuration.GetConnectionString("DefaultConnection")
+                conn = configuration.GetConnectionString("AppString")
                     ?? throw new InvalidOperationException(
                         "No database connection string configured.");
             }
 
             services.AddDbContext<ProjectDbContext>(options =>
-                options.UseNpgsql(conn)
-                       .EnableDetailedErrors());
+            {
+                options.UseNpgsql(conn);
+
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    options.EnableDetailedErrors();
+                }
+            });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -133,7 +142,11 @@ namespace Infrastructure.Extensions
             var context = services.GetRequiredService<ProjectDbContext>();
             var passwordHasher = services.GetRequiredService<IPasswordHasher>();
 
-            await DbInitializer.SeedAsync(context, passwordHasher);
+            // await DbInitializer.SeedAsync(context, passwordHasher);
+            if (!context.Users.Any())
+            {
+                await DbInitializer.SeedAsync(context, passwordHasher);
+            }
         }
 
         public static IServiceCollection AddEmailService(this IServiceCollection services, IConfiguration configuration)
@@ -143,8 +156,15 @@ namespace Infrastructure.Extensions
                 var config = new brevo_csharp.Client.Configuration();
                 var apiKey = configuration["Brevo:ApiKey"];
 
-                if (string.IsNullOrEmpty(apiKey))
-                    throw new InvalidOperationException("Brevo API Key is not configured!");
+                // if (string.IsNullOrEmpty(apiKey))
+                //     throw new InvalidOperationException("Brevo API Key is not configured!");
+
+                if (string.IsNullOrWhiteSpace(apiKey))
+                {
+                    var logger = provider.GetRequiredService<ILogger<BrevoEmailService>>();
+                    logger.LogWarning("Brevo API Key is missing. Email sending will be disabled.");
+                    return null!;
+                }
 
                 config.AddApiKey("api-key", apiKey);
 
@@ -172,14 +192,33 @@ namespace Infrastructure.Extensions
             return services;
         }
 
-        public static IServiceCollection AddStorageService(this IServiceCollection services, string webRootPath)
-        {
-            services.AddSingleton(new LocalStorageService(webRootPath));
-            services.AddSingleton<CloudinaryStorageService>();
+        // public static IServiceCollection AddStorageService(this IServiceCollection services, string webRootPath)
+        // {
+        //     // services.AddSingleton(new LocalStorageService(webRootPath));
+        //     // services.AddSingleton<CloudinaryStorageService>();
 
-            services.AddScoped<IStorageManager, StorageManager>();
-            return services;
+        //     services.AddScoped<IStorageService, LocalStorageService>();
+        //     services.AddScoped<IStorageService, CloudinaryStorageService>();
+
+        //     services.AddScoped<IStorageManager, StorageManager>();
+        //     return services;
+        // }
+
+        public static IServiceCollection AddStorageService(this IServiceCollection services,  IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            services.AddSingleton<IStorageService>(
+                new LocalStorageService(env.ContentRootPath));
         }
+        else
+        {
+            services.AddScoped<IStorageService, CloudinaryStorageService>();
+        }
+
+        services.AddScoped<IStorageManager, StorageManager>();
+        return services;
+    }
 
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
