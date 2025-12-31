@@ -221,4 +221,11 @@ app.MapControllers();
 
 app.MapHub<NotificationHub>("/hubs/notifications");
 
+app.MapGet("/", () => Results.Ok(new
+{
+    service = "Emergency Rescue System API",
+    status = "Running",
+    environment = app.Environment.EnvironmentName
+}));
+
 app.Run();
