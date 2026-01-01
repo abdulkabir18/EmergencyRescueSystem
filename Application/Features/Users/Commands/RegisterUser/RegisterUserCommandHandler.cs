@@ -15,17 +15,17 @@ namespace Application.Features.Users.Commands.RegisterUser
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly IStorageManager _storageManager;
+        private readonly IStorageService _storageService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
         private readonly ILogger<RegisterUserCommandHandler> _logger;
 
-        public RegisterUserCommandHandler(IUserRepository userRepository, ICacheService cacheService, IPasswordHasher passwordHasher, IStorageManager storageManager, IUnitOfWork unitOfWork, ILogger<RegisterUserCommandHandler> logger)
+        public RegisterUserCommandHandler(IUserRepository userRepository, ICacheService cacheService, IPasswordHasher passwordHasher, IStorageService storageService, IUnitOfWork unitOfWork, ILogger<RegisterUserCommandHandler> logger)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _cacheService = cacheService;
-            _storageManager = storageManager;
+            _storageService = storageService;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -56,7 +56,7 @@ namespace Application.Features.Users.Commands.RegisterUser
                 if (request.Model.ProfilePicture != null)
                 {
                     using var stream = request.Model.ProfilePicture.OpenReadStream();
-                    string url = await _storageManager.UploadProfileImageAsync(stream, request.Model.ProfilePicture.FileName, request.Model.ProfilePicture.ContentType);
+                    string url = await _storageService.UploadAsync(stream, request.Model.ProfilePicture.FileName, request.Model.ProfilePicture.ContentType, "naijarescue/profile-images");
 
                     user.SetProfilePicture(url);
                 }

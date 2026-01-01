@@ -13,6 +13,9 @@ namespace Infrastructure.Services.Storage
 
         public CloudinaryStorageService(IConfiguration configuration, ILogger<CloudinaryStorageService> logger)
         {
+            if (string.IsNullOrWhiteSpace(configuration["Cloudinary:CloudName"]) || string.IsNullOrWhiteSpace(configuration["Cloudinary:ApiKey"]) || string.IsNullOrWhiteSpace(configuration["Cloudinary:ApiSecret"]))
+                throw new InvalidOperationException("Cloudinary configuration is missing.");
+
             var account = new Account(
                 configuration["Cloudinary:CloudName"],
                 configuration["Cloudinary:ApiKey"],
@@ -23,7 +26,7 @@ namespace Infrastructure.Services.Storage
             _logger = logger;
         }
 
-        public async Task<string> UploadAsync(Stream fileStream, string fileName, string contentType)
+        public async Task<string> UploadAsync(Stream fileStream, string fileName, string contentType, string folder)
         {
             string resourceType = GetResourceType(contentType);
 
@@ -41,7 +44,7 @@ namespace Infrastructure.Services.Storage
                             UseFilename = true,
                             UniqueFilename = true,
                             Overwrite = false,
-                            Folder = "naijarescue"
+                            Folder = folder
                         };
                         uploadResult = await _cloudinary.UploadAsync(uploadParams);
                         break;
@@ -52,7 +55,7 @@ namespace Infrastructure.Services.Storage
                             UseFilename = true,
                             UniqueFilename = true,
                             Overwrite = false,
-                            Folder = "naijarescue"
+                            Folder = folder
                         };
                         uploadResult = await _cloudinary.UploadAsync(uploadParams);
                         break;
@@ -63,7 +66,7 @@ namespace Infrastructure.Services.Storage
                             UseFilename = true,
                             UniqueFilename = true,
                             Overwrite = false,
-                            Folder = "naijarescue"
+                            Folder = folder
                         };
                         uploadResult = await _cloudinary.UploadAsync(uploadParams);
                         break;

@@ -13,16 +13,16 @@ namespace Application.Features.Agencies.Commands.SetLogo
         private readonly IAgencyRepository _agencyRepository;
         private readonly ICacheService _cacheService;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IStorageManager _storageManager;
+        private readonly IStorageService _storageService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<SetLogoCommandHandler> _logger;
 
-        public SetLogoCommandHandler(ICacheService cacheService, IAgencyRepository agencyRepository, ICurrentUserService currentUserService, IStorageManager storageManager, IUnitOfWork unitOfWork, ILogger<SetLogoCommandHandler> logger)
+        public SetLogoCommandHandler(ICacheService cacheService, IAgencyRepository agencyRepository, ICurrentUserService currentUserService, IStorageService storageService, IUnitOfWork unitOfWork, ILogger<SetLogoCommandHandler> logger)
         {
             _agencyRepository = agencyRepository;
             _cacheService = cacheService;
             _currentUserService = currentUserService;
-            _storageManager = storageManager;
+            _storageService = storageService;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -57,7 +57,7 @@ namespace Application.Features.Agencies.Commands.SetLogo
                 }
 
                 using var stream = request.Logo.OpenReadStream();
-                string imageUrl = await _storageManager.UploadProfileImageAsync(stream, request.Logo.FileName, request.Logo.ContentType);
+                string imageUrl = await _storageService.UploadAsync(stream, request.Logo.FileName, request.Logo.ContentType, "naijarescue/agency-logos");
 
                 agency.SetLogo(imageUrl);
 

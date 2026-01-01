@@ -20,7 +20,7 @@ namespace Application.Features.Responders.Commands.RegisterResponder
         private readonly IUserRepository _userRepository;
         private readonly IAgencyRepository _agencyRepository;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly IStorageManager _storageManager;
+        private readonly IStorageService _storageService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
         private readonly ILogger<RegisterResponderCommandHandler> _logger;
@@ -31,7 +31,7 @@ namespace Application.Features.Responders.Commands.RegisterResponder
             IUserRepository userRepository,
             IAgencyRepository agencyRepository,
             IPasswordHasher passwordHasher,
-            IStorageManager storageManager,
+            IStorageService storageService,
             IUnitOfWork unitOfWork,
             ICacheService cacheService,
             ILogger<RegisterResponderCommandHandler> logger)
@@ -41,7 +41,7 @@ namespace Application.Features.Responders.Commands.RegisterResponder
             _userRepository = userRepository;
             _agencyRepository = agencyRepository;
             _passwordHasher = passwordHasher;
-            _storageManager = storageManager;
+            _storageService = storageService;
             _unitOfWork = unitOfWork;
             _cacheService = cacheService;
             _logger = logger;
@@ -81,7 +81,7 @@ namespace Application.Features.Responders.Commands.RegisterResponder
                 if (request.Model.RegisterUserRequest.ProfilePicture != null)
                 {
                     using var stream = request.Model.RegisterUserRequest.ProfilePicture.OpenReadStream();
-                    string imageUrl = await _storageManager.UploadProfileImageAsync(stream, request.Model.RegisterUserRequest.ProfilePicture.FileName, request.Model.RegisterUserRequest.ProfilePicture.ContentType);
+                    string imageUrl = await _storageService.UploadAsync(stream, request.Model.RegisterUserRequest.ProfilePicture.FileName, request.Model.RegisterUserRequest.ProfilePicture.ContentType, "naijarescue/profile-images");
 
                     user.SetProfilePicture(imageUrl);
                 }

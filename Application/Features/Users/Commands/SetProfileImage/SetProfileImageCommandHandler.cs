@@ -13,16 +13,16 @@ namespace Application.Features.Users.Commands.SetProfileImage
         private readonly IUserRepository _userRepository;
         private readonly ICacheService _cacheService;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IStorageManager _storageManager;
+        private readonly IStorageService _storageService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<SetProfileImageCommandHandler> _logger;
 
-        public SetProfileImageCommandHandler(ICacheService cacheService, IUserRepository userRepository, ICurrentUserService currentUserService, IStorageManager storageManager, IUnitOfWork unitOfWork, ILogger<SetProfileImageCommandHandler> logger)
+        public SetProfileImageCommandHandler(ICacheService cacheService, IUserRepository userRepository, ICurrentUserService currentUserService, IStorageService storageService, IUnitOfWork unitOfWork, ILogger<SetProfileImageCommandHandler> logger)
         {
             _userRepository = userRepository;
             _cacheService = cacheService;
             _currentUserService = currentUserService;
-            _storageManager = storageManager;
+            _storageService = storageService;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -59,7 +59,7 @@ namespace Application.Features.Users.Commands.SetProfileImage
                 }
 
                 using var stream = request.Image.OpenReadStream();
-                string url = await _storageManager.UploadProfileImageAsync(stream, request.Image.FileName, request.Image.ContentType);
+                string url = await _storageService.UploadAsync(stream, request.Image.FileName, request.Image.ContentType, "naijarescue/profile-images");
 
                 user.SetProfilePicture(url);
 

@@ -132,7 +132,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddSecurity();
 builder.Services.AddEmailService(builder.Configuration);
-builder.Services.AddStorageService(builder.Environment);
+builder.Services.AddStorageService();
 builder.Services.AddAIService();
 builder.Services.AddGeocodingService();
 

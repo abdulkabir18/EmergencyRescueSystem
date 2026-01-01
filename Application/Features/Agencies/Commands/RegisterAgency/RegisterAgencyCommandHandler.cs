@@ -18,17 +18,17 @@ namespace Application.Features.Agencies.Commands.RegisterAgency
         private readonly IUserRepository _userRepository;
         private readonly IAgencyRepository _agencyRepository;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly IStorageManager _storageManager;
+        private readonly IStorageService _storageService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RegisterAgencyCommandHandler> _logger;
 
-        public RegisterAgencyCommandHandler(IUserRepository userRepository, IAgencyRepository agencyRepository, IPasswordHasher passwordHasher, IStorageManager storageManager, ICurrentUserService currentUserService, IUnitOfWork unitOfWork, ILogger<RegisterAgencyCommandHandler> logger)
+        public RegisterAgencyCommandHandler(IUserRepository userRepository, IAgencyRepository agencyRepository, IPasswordHasher passwordHasher, IStorageService storageService, ICurrentUserService currentUserService, IUnitOfWork unitOfWork, ILogger<RegisterAgencyCommandHandler> logger)
         {
             _userRepository = userRepository;
             _agencyRepository = agencyRepository;
             _passwordHasher = passwordHasher;
-            _storageManager = storageManager;
+            _storageService = storageService;
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -71,7 +71,7 @@ namespace Application.Features.Agencies.Commands.RegisterAgency
                 if (request.Model.RegisterUserRequest.ProfilePicture != null)
                 {
                     using var stream = request.Model.RegisterUserRequest.ProfilePicture.OpenReadStream();
-                    string imageUrl = await _storageManager.UploadProfileImageAsync(stream, request.Model.RegisterUserRequest.ProfilePicture.FileName, request.Model.RegisterUserRequest.ProfilePicture.ContentType);
+                    string imageUrl = await _storageService.UploadAsync(stream, request.Model.RegisterUserRequest.ProfilePicture.FileName, request.Model.RegisterUserRequest.ProfilePicture.ContentType, "naijarescue/profile-images");
 
                     user.SetProfilePicture(imageUrl);
                 }
@@ -88,7 +88,7 @@ namespace Application.Features.Agencies.Commands.RegisterAgency
                 if (request.Model.AgencyLogo != null)
                 {
                     using var stream = request.Model.AgencyLogo.OpenReadStream();
-                    string imageUrl = await _storageManager.UploadProfileImageAsync(stream, request.Model.AgencyLogo.FileName, request.Model.AgencyLogo.ContentType);
+                    string imageUrl = await _storageService.UploadAsync(stream, request.Model.AgencyLogo.FileName, request.Model.AgencyLogo.ContentType, "naijarescue/agency-logos");
 
                     agency.SetLogo(imageUrl);
                 }

@@ -21,7 +21,6 @@ using Infrastructure.Services.Email;
 using Infrastructure.Services.GoogleMaps;
 using Infrastructure.Services.Notifications;
 using Infrastructure.Services.Storage;
-using Infrastructure.Services.Storage.Manager;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -204,21 +203,12 @@ namespace Infrastructure.Extensions
         //     return services;
         // }
 
-        public static IServiceCollection AddStorageService(this IServiceCollection services,  IWebHostEnvironment env)
-    {
-        if (env.IsDevelopment())
-        {
-            services.AddSingleton<IStorageService>(
-                new LocalStorageService(env.ContentRootPath));
-        }
-        else
+        public static IServiceCollection AddStorageService(this IServiceCollection services)
         {
             services.AddScoped<IStorageService, CloudinaryStorageService>();
-        }
 
-        services.AddScoped<IStorageManager, StorageManager>();
-        return services;
-    }
+            return services;
+        }
 
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
