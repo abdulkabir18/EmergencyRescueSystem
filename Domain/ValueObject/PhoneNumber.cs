@@ -7,7 +7,7 @@ namespace Domain.ValueObject
         public string Value { get; } = default!;
 
         private static readonly Regex PhoneNumberRegex =
-            new(@"^(?:\+234|0)(7[0-9]|8[0-9]|9[0-9])\d{7}$",
+            new(@"^(?:\+234|0)(7[0-9]|8[0-9]|9[0-9])\d{8}$",
                 RegexOptions.Compiled);
 
         private PhoneNumber() { }
@@ -44,5 +44,9 @@ namespace Domain.ValueObject
         public static implicit operator string(PhoneNumber phone) => phone.Value;
 
         public static explicit operator PhoneNumber(string value) => new(value);
+
+        public static bool operator ==(PhoneNumber? left, PhoneNumber? right) => Equals(left, right);
+
+        public static bool operator !=(PhoneNumber? left, PhoneNumber? right) => !Equals(left, right);
     }
 }
