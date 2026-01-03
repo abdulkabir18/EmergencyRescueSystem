@@ -122,7 +122,7 @@ namespace Host.Extensions
                         var path = context.HttpContext.Request.Path;
 
                         if (!string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/hubs/notifications")) 
+                            path.StartsWithSegments("/hubs/notifications"))
                         {
                             context.Token = accessToken;
                         }
@@ -152,7 +152,8 @@ namespace Host.Extensions
                     policy.WithOrigins(
                             "http://127.0.0.1:5500",
                             "http://localhost",
-                            "http://127.0.0.1:5501"
+                            "http://127.0.0.1:5501",
+                            "https://abdulkabir18.github.io/naijarescue-frontend/"
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
