@@ -153,7 +153,8 @@ namespace Host.Extensions
                             "http://127.0.0.1:5500",
                             "http://localhost",
                             "http://127.0.0.1:5501",
-                            "https://abdulkabir18.github.io/naijarescue-frontend/"
+                            "https://abdulkabir18.github.io/naijarescue-frontend/",
+                            "https://abdulkabir18.github.io/"
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
